@@ -1,0 +1,7 @@
+app:
+  seed:
+    enabled: true
+
+logging:
+  level:
+    com.socialapp: DEBUG

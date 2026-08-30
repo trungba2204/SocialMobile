@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: orbit-backend
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:social_network}?createDatabaseIfNotExist=true&serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:1234567890}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 220MB
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:dev-only-change-me-please-32-bytes-minimum-secret-value}
+    access-ttl: ${JWT_ACCESS_TTL:PT15M}
+    refresh-ttl: ${JWT_REFRESH_TTL:P7D}
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:8081,http://localhost:19006,exp://127.0.0.1:19000}
+  storage:
+    local:
+      dir: ${STORAGE_DIR:./uploads}
+  seed:
+    enabled: ${SEED_ENABLED:false}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    root: INFO
