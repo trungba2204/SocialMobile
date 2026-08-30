@@ -32,12 +32,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserControllerTest {
 
     private final UserService userService = mock(UserService.class);
+    private final com.socialapp.post.PostService postService = mock(com.socialapp.post.PostService.class);
     private final ObjectMapper json = new ObjectMapper();
     private MockMvc mvc;
 
     @BeforeEach
     void setup() {
-        mvc = MockMvcBuilders.standaloneSetup(new UserController(userService))
+        mvc = MockMvcBuilders.standaloneSetup(new UserController(userService, postService))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .setCustomArgumentResolvers(new CurrentUserArgumentResolver())
                 .build();
