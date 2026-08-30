@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /Users/quanden/Downloads/SocialMobile/backend)",
+      "Bash(export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-21.jdk/Contents/Home)",
+      "Bash(mvn -B test)"
+    ]
+  }
+}

@@ -24,9 +24,10 @@ CREATE DATABASE IF NOT EXISTS social_network
 ## Schema management
 
 Development uses Hibernate `spring.jpa.hibernate.ddl-auto=update` — the schema
-is derived from the JPA entities on startup. `schema.sql` in the backend
-resources is a **hand-maintained reference only** (it is not executed). Before
-any shared or production deployment, adopt **Flyway**: move `schema.sql` to
+is derived from the JPA entities on startup.
+`backend/src/main/resources/db/schema-reference.sql` is a **hand-maintained
+reference only** (not executed; `spring.sql.init.mode=never`). Before
+any shared or production deployment, adopt **Flyway**: move that file to
 `src/main/resources/db/migration/V1__init.sql`, add the `flyway-mysql`
 dependency, and set `ddl-auto=validate`.
 

@@ -5,6 +5,9 @@ spring:
     url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:social_network}?createDatabaseIfNotExist=true&serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
     username: ${DB_USER:root}
     password: ${DB_PASSWORD:1234567890}
+  sql:
+    init:
+      mode: never
   jpa:
     hibernate:
       ddl-auto: update
