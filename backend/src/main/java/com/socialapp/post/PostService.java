@@ -105,6 +105,15 @@ public class PostService implements PostStatsPort {
     }
 
     @Transactional(readOnly = true)
+    public Page<PostDto> search(String query, long viewerId, Pageable pageable) {
+        if (query == null || query.trim().length() < 2) {
+            return Page.empty(pageable);
+        }
+        Page<Post> page = posts.searchVisible(query.trim(), viewerId, friendIdsOrSentinel(viewerId), pageable);
+        return mapPage(page, viewerId);
+    }
+
+    @Transactional(readOnly = true)
     public Page<PostDto> byAuthor(long authorId, long viewerId, Pageable pageable) {
         Page<Post> page = posts.findByAuthorIdOrderByCreatedAtDesc(authorId, pageable);
         return mapPage(page, viewerId);
