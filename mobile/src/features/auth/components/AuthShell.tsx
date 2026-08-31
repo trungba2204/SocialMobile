@@ -6,6 +6,11 @@ import { Text } from '@/components/Text';
 import { Logo } from '@/components/Logo';
 import { useTheme } from '@/theme/useTheme';
 
+// The orbital-arc backdrop SVG is intentionally oversized and anchored off the
+// top-right corner so only a slice of the concentric rings shows behind content.
+const BACKDROP_TOP = -80;
+const BACKDROP_RIGHT = -120;
+
 export type AuthShellProps = {
   title: string;
   subtitle?: string;
@@ -62,9 +67,10 @@ export function AuthShell({ title, subtitle, children, footer, testID }: AuthShe
 const styles = StyleSheet.create({
   backdrop: {
     position: 'absolute',
-    top: -80,
-    right: -120,
+    top: BACKDROP_TOP,
+    right: BACKDROP_RIGHT,
     opacity: 0.9,
+    overflow: 'hidden',
   },
   content: {
     flex: 1,

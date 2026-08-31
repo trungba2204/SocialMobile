@@ -1,4 +1,4 @@
-import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '@/theme/ThemeProvider';
 import { RegisterScreen } from '@/features/auth/RegisterScreen';
@@ -32,22 +32,28 @@ function renderScreen() {
 }
 
 describe('RegisterScreen', () => {
+  const setSession = jest.fn().mockResolvedValue(undefined);
+
   beforeEach(() => {
     jest.clearAllMocks();
-    useAuthStore.setState({ setSession: jest.fn() as never });
+    setSession.mockResolvedValue(undefined);
+    useAuthStore.setState({ setSession: setSession as never });
   });
+
+  async function fillValidExcept(
+    getByPlaceholderText: Awaited<ReturnType<typeof renderScreen>>['getByPlaceholderText'],
+    username: string,
+  ) {
+    await fireEvent.changeText(getByPlaceholderText('you@example.com'), 'alice@example.com');
+    await fireEvent.changeText(getByPlaceholderText('your_handle'), username);
+    await fireEvent.changeText(getByPlaceholderText('How your name appears'), 'Alice');
+    await fireEvent.changeText(getByPlaceholderText('At least 8 characters'), 'abc12345');
+  }
 
   it('blocks a bad username client-side before any network call', async () => {
     const { getByPlaceholderText, getByText } = await renderScreen();
-    await act(async () => {
-      fireEvent.changeText(getByPlaceholderText('you@example.com'), 'alice@example.com');
-      fireEvent.changeText(getByPlaceholderText('your_handle'), 'AB');
-      fireEvent.changeText(getByPlaceholderText('How your name appears'), 'Alice');
-      fireEvent.changeText(getByPlaceholderText('At least 8 characters'), 'abc12345');
-    });
-    await act(async () => {
-      fireEvent.press(getByText('Create account'));
-    });
+    await fillValidExcept(getByPlaceholderText, 'AB');
+    await fireEvent.press(getByText('Create account'));
 
     await waitFor(() => expect(getByText(/lowercase/i)).toBeTruthy());
     expect(register).not.toHaveBeenCalled();
@@ -55,16 +61,10 @@ describe('RegisterScreen', () => {
 
   it('surfaces a 409 message on the username field', async () => {
     register.mockRejectedValue(new ApiError('Username is already taken', 409));
+
     const { getByPlaceholderText, getByText } = await renderScreen();
-    await act(async () => {
-      fireEvent.changeText(getByPlaceholderText('you@example.com'), 'alice@example.com');
-      fireEvent.changeText(getByPlaceholderText('your_handle'), 'alice_1');
-      fireEvent.changeText(getByPlaceholderText('How your name appears'), 'Alice');
-      fireEvent.changeText(getByPlaceholderText('At least 8 characters'), 'abc12345');
-    });
-    await act(async () => {
-      fireEvent.press(getByText('Create account'));
-    });
+    await fillValidExcept(getByPlaceholderText, 'alice_1');
+    await fireEvent.press(getByText('Create account'));
 
     await waitFor(() => expect(register).toHaveBeenCalled());
     await waitFor(() => expect(getByText('Username is already taken')).toBeTruthy());

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
+  cancelAnimation,
   Easing,
   useAnimatedStyle,
   useSharedValue,
@@ -30,6 +31,7 @@ export function SplashScreen() {
       -1,
       false,
     );
+    return () => cancelAnimation(rotation);
   }, [rotation]);
 
   const ringStyle = useAnimatedStyle(() => ({
@@ -38,7 +40,12 @@ export function SplashScreen() {
 
   return (
     <ScreenContainer testID="splash-screen" edges={[]}>
-      <View style={[styles.center, { backgroundColor: theme.colors.primaryMuted }]}>
+      <View
+        style={[
+          styles.center,
+          { backgroundColor: theme.colors.primaryMuted, gap: theme.space.lg },
+        ]}
+      >
         <View style={styles.badge}>
           <Animated.View style={[styles.ring, ringStyle]}>
             <Svg width={RING_SIZE} height={RING_SIZE} viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}>
@@ -68,7 +75,7 @@ export function SplashScreen() {
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 24 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   badge: { width: RING_SIZE, height: RING_SIZE, alignItems: 'center', justifyContent: 'center' },
   ring: { position: 'absolute', width: RING_SIZE, height: RING_SIZE },
   logo: { alignItems: 'center', justifyContent: 'center' },

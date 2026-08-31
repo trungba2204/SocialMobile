@@ -1,4 +1,4 @@
-import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '@/theme/ThemeProvider';
 import { LoginScreen } from '@/features/auth/LoginScreen';
@@ -32,16 +32,17 @@ function renderScreen() {
 }
 
 describe('LoginScreen', () => {
+  const setSession = jest.fn().mockResolvedValue(undefined);
+
   beforeEach(() => {
     jest.clearAllMocks();
-    useAuthStore.setState({ setSession: jest.fn() as never });
+    setSession.mockResolvedValue(undefined);
+    useAuthStore.setState({ setSession: setSession as never });
   });
 
   it('blocks empty submit with a validation error and does not call the API', async () => {
     const { getByText } = await renderScreen();
-    await act(async () => {
-      fireEvent.press(getByText('Log in'));
-    });
+    await fireEvent.press(getByText('Log in'));
     await waitFor(() => expect(getByText('Enter your email or username')).toBeTruthy());
     expect(login).not.toHaveBeenCalled();
   });
@@ -53,17 +54,11 @@ describe('LoginScreen', () => {
       user: { id: 1, username: 'x', displayName: 'X', avatarUrl: null, bio: null },
     };
     login.mockResolvedValue(auth);
-    const setSession = jest.fn();
-    useAuthStore.setState({ setSession: setSession as never });
 
     const { getByPlaceholderText, getByText } = await renderScreen();
-    await act(async () => {
-      fireEvent.changeText(getByPlaceholderText('you@example.com or username'), 'alice@example.com');
-      fireEvent.changeText(getByPlaceholderText('Your password'), 'abc12345');
-    });
-    await act(async () => {
-      fireEvent.press(getByText('Log in'));
-    });
+    await fireEvent.changeText(getByPlaceholderText('you@example.com or username'), 'alice@example.com');
+    await fireEvent.changeText(getByPlaceholderText('Your password'), 'abc12345');
+    await fireEvent.press(getByText('Log in'));
 
     await waitFor(() =>
       expect(login).toHaveBeenCalledWith({
@@ -76,14 +71,11 @@ describe('LoginScreen', () => {
 
   it('shows a form-level error on 401 without crashing', async () => {
     login.mockRejectedValue(new ApiError('Unauthorized', 401));
+
     const { getByPlaceholderText, getByText } = await renderScreen();
-    await act(async () => {
-      fireEvent.changeText(getByPlaceholderText('you@example.com or username'), 'alice');
-      fireEvent.changeText(getByPlaceholderText('Your password'), 'abc12345');
-    });
-    await act(async () => {
-      fireEvent.press(getByText('Log in'));
-    });
+    await fireEvent.changeText(getByPlaceholderText('you@example.com or username'), 'alice');
+    await fireEvent.changeText(getByPlaceholderText('Your password'), 'abc12345');
+    await fireEvent.press(getByText('Log in'));
 
     await waitFor(() =>
       expect(getByText('Incorrect email/username or password')).toBeTruthy(),
