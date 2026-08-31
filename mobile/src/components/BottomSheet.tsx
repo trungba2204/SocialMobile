@@ -1,5 +1,5 @@
-import { type ReactNode } from 'react';
-import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { useEffect, type ReactNode } from 'react';
+import { Dimensions, Modal, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useAnimatedStyle,
@@ -18,12 +18,15 @@ export type BottomSheetProps = {
 export function BottomSheet({ visible, onClose, children, snapHeight }: BottomSheetProps) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const travel = snapHeight ?? Dimensions.get('window').height;
   const translate = useSharedValue(visible ? 0 : 1);
 
-  translate.value = withTiming(visible ? 0 : 1, { duration: 220 });
+  useEffect(() => {
+    translate.value = withTiming(visible ? 0 : 1, { duration: 220 });
+  }, [visible, translate]);
 
   const sheetStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translate.value * 600 }],
+    transform: [{ translateY: translate.value * travel }],
   }));
 
   return (

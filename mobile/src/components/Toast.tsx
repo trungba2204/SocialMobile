@@ -45,7 +45,11 @@ export function ToastHost() {
   return (
     <Animated.View
       pointerEvents="none"
-      style={[styles.wrap, { bottom: insets.bottom + theme.space.xl }, animatedStyle]}
+      style={[
+        styles.wrap,
+        { bottom: insets.bottom + theme.space.xl, paddingHorizontal: theme.space.xl },
+        animatedStyle,
+      ]}
     >
       <View
         style={[
@@ -69,6 +73,6 @@ export function ToastHost() {
 export const Toast = ToastHost;
 
 const styles = StyleSheet.create({
-  wrap: { position: 'absolute', left: 0, right: 0, alignItems: 'center', paddingHorizontal: 24 },
+  wrap: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
   toast: { maxWidth: '100%' },
 });

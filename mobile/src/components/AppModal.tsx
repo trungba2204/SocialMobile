@@ -12,7 +12,7 @@ export function AppModal({ visible, onClose, children }: AppModalProps) {
   const theme = useTheme();
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.fill}>
+      <View style={[styles.fill, { padding: theme.space.xl }]}>
         <Pressable
           accessibilityLabel="Close"
           style={[styles.backdrop, { backgroundColor: theme.colors.overlay }]}
@@ -37,7 +37,7 @@ export function AppModal({ visible, onClose, children }: AppModalProps) {
 }
 
 const styles = StyleSheet.create({
-  fill: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+  fill: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   backdrop: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
   card: { width: '100%', maxWidth: 400 },
 });
