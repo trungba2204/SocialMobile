@@ -27,7 +27,7 @@ const config: ExpoConfig = {
   },
   plugins: ['expo-secure-store', 'expo-image-picker'],
   extra: {
-    apiUrl: process.env.EXPO_PUBLIC_API_URL,
+    apiUrl: process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080',
   },
 };
 
