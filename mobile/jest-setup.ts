@@ -57,3 +57,20 @@ jest.mock('expo-font', () => ({
   ...jest.requireActual('expo-font'),
   useFonts: () => [true, null],
 }));
+jest.mock('expo-image-picker', () => ({
+  __esModule: true,
+  requestMediaLibraryPermissionsAsync: jest.fn(async () => ({ granted: true, status: 'granted' })),
+  launchImageLibraryAsync: jest.fn(async () => ({
+    canceled: false,
+    assets: [
+      {
+        uri: 'file:///picked/photo.jpg',
+        fileName: 'photo.jpg',
+        mimeType: 'image/jpeg',
+        width: 100,
+        height: 100,
+        type: 'image',
+      },
+    ],
+  })),
+}));

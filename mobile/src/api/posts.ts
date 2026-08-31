@@ -26,10 +26,22 @@ export function get(id: number): Promise<PostDto> {
 export function create(input: CreatePostInput): Promise<PostDto> {
   const { media = [], ...fields } = input;
   const form = new FormData();
-  form.append('post', JSON.stringify(fields));
-  for (const asset of media) {
-    form.append('media', buildFilePart(asset) as unknown as Blob);
-  }
+  // React Native FormData: a { string, type, name } object produces a part
+  // whose Content-Type is `application/json`, which Spring's
+  // `@RequestPart("post") CreatePostRequest` requires to bind (an untyped
+  // string part fails with 500 — verified against the backend, Task 11 Step 2).
+  form.append('post', {
+    string: JSON.stringify(fields),
+    type: 'application/json',
+    name: 'post',
+  } as unknown as Blob);
+  media.forEach((asset, i) => {
+    form.append('media', {
+      ...buildFilePart(asset),
+      name: asset.name ?? `media_${i}.jpg`,
+      type: asset.type ?? 'image/jpeg',
+    } as unknown as Blob);
+  });
   return api
     .post<PostDto>('/posts', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
