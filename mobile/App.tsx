@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '@/theme/ThemeProvider';
 import { useTheme } from '@/theme/useTheme';
 import { Text } from '@/components/Text';
+import { ToastHost } from '@/components/Toast';
 
 function Root() {
   const theme = useTheme();
@@ -24,6 +25,7 @@ export default function App() {
       <SafeAreaProvider>
         <ThemeProvider>
           <Root />
+          <ToastHost />
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
