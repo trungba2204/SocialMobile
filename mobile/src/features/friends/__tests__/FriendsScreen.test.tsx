@@ -69,6 +69,15 @@ describe('FriendsScreen', () => {
     await waitFor(() => expect(getByText('Nova Reyes')).toBeTruthy());
   });
 
+  it('switches to Suggestions when "Find people" is pressed on the empty All tab', async () => {
+    list.mockResolvedValue(page<UserDto>([]));
+    const { getByText } = await renderScreen();
+    await waitFor(() => expect(getByText('Find people')).toBeTruthy());
+
+    fireEvent.press(getByText('Find people'));
+    await waitFor(() => expect(suggestions).toHaveBeenCalled());
+  });
+
   it('accepts a request: calls friends.accept and removes the row', async () => {
     const { getByText, queryByText } = await renderScreen();
     await waitFor(() => expect(getByText('Kai Mercer')).toBeTruthy());

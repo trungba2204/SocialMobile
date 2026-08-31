@@ -69,7 +69,11 @@ export function FriendsScreen() {
       </View>
       <Tabs tabs={TABS} active={tab} onChange={(k) => setTab(k as TabKey)} />
       {tab === 'all' ? (
-        <AllTab navigation={navigation} showToast={showToast} />
+        <AllTab
+          navigation={navigation}
+          showToast={showToast}
+          onFindPeople={() => setTab('suggestions')}
+        />
       ) : tab === 'requests' ? (
         <RequestsTab navigation={navigation} showToast={showToast} />
       ) : (
@@ -84,7 +88,7 @@ type TabProps = {
   showToast: (t: { message: string; tone: 'neutral' | 'success' | 'error' }) => void;
 };
 
-function AllTab({ navigation, showToast }: TabProps) {
+function AllTab({ navigation, showToast, onFindPeople }: TabProps & { onFindPeople: () => void }) {
   const theme = useTheme();
   const { items, loading, refreshing, error, endReached, refresh, loadMore, setItems } =
     usePagedQuery<UserDto>((page) => friends.list(page));
@@ -142,7 +146,7 @@ function AllTab({ navigation, showToast }: TabProps) {
               title="No friends yet"
               body="Find people you know and send them a request."
               actionLabel="Find people"
-              onAction={() => navigation.navigate('FriendsTab', { screen: 'Friends' })}
+              onAction={onFindPeople}
             />
           )
         }
