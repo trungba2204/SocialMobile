@@ -12,6 +12,9 @@ import { Text } from '@/components/Text';
 import { PressableScale } from '@/components/PressableScale';
 import { compactCount } from '@/lib/format';
 
+// Gap between an action icon and its count label — sits between space.xs (4) and space.sm (8).
+const ICON_LABEL_GAP = 6;
+
 export type PostActionsProps = {
   liked: boolean;
   likeCount: number;
@@ -99,5 +102,5 @@ export function PostActions({
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
-  action: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44 },
+  action: { flexDirection: 'row', alignItems: 'center', gap: ICON_LABEL_GAP, minHeight: 44 },
 });

@@ -10,8 +10,17 @@ import { resolveMediaUrl } from '@/lib/resolveMediaUrl';
 import { useAuthStore } from '@/store/useAuthStore';
 import { MOCK_STORIES } from '@/mock/stories';
 
+// Rounded-rect story card geometry (token-less: fixed art direction, not spacing scale).
 const CARD_W = 96;
 const CARD_H = 140;
+const ADD_AVATAR = 40;
+const STORY_AVATAR = 28;
+// "+" badge sits on the lower-right of the add-card avatar.
+const PLUS_SIZE = 20;
+const PLUS_OFFSET = ADD_AVATAR - PLUS_SIZE / 2 - 4;
+// Gradient-style ring inset around the story avatar.
+const RING_BORDER = 2;
+const RING_INSET = 2;
 
 export function StoriesRail() {
   const theme = useTheme();
@@ -33,10 +42,15 @@ export function StoriesRail() {
         onPress={() => navigation.navigate('StoryViewer', { userIndex: 0 })}
         style={[
           styles.card,
-          { borderRadius: theme.radius.lg, backgroundColor: theme.colors.card, borderColor: theme.colors.border },
+          {
+            borderRadius: theme.radius.lg,
+            padding: theme.space.sm,
+            backgroundColor: theme.colors.card,
+            borderColor: theme.colors.border,
+          },
         ]}
       >
-        <Avatar uri={user?.avatarUrl ?? null} name={user?.displayName ?? 'You'} size={40} />
+        <Avatar uri={user?.avatarUrl ?? null} name={user?.displayName ?? 'You'} size={ADD_AVATAR} />
         <View style={[styles.plus, { backgroundColor: theme.colors.primary, borderColor: theme.colors.card }]}>
           <Plus size={14} color={theme.colors.onPrimary} />
         </View>
@@ -51,7 +65,7 @@ export function StoriesRail() {
           accessibilityRole="button"
           accessibilityLabel={`${story.authorName}'s story`}
           onPress={() => navigation.navigate('StoryViewer', { userIndex: i + 1 })}
-          style={[styles.card, { borderRadius: theme.radius.lg, overflow: 'hidden' }]}
+          style={[styles.card, { borderRadius: theme.radius.lg, padding: theme.space.sm, overflow: 'hidden' }]}
         >
           <Image
             source={{ uri: resolveMediaUrl(story.imageUrl) }}
@@ -60,7 +74,7 @@ export function StoriesRail() {
             accessibilityLabel={`${story.authorName} story`}
           />
           <View style={[styles.ring, { borderColor: theme.colors.accent }]}>
-            <Avatar uri={story.avatarUrl} name={story.authorName} size={28} />
+            <Avatar uri={story.avatarUrl} name={story.authorName} size={STORY_AVATAR} />
           </View>
           <View style={styles.nameWrap}>
             <Text variant="metadata" color="surface" numberOfLines={1}>
@@ -79,20 +93,24 @@ const styles = StyleSheet.create({
     width: CARD_W,
     height: CARD_H,
     borderWidth: StyleSheet.hairlineWidth,
-    padding: 8,
     justifyContent: 'space-between',
   },
   plus: {
     position: 'absolute',
-    top: 34,
-    left: 34,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    top: PLUS_OFFSET,
+    left: PLUS_OFFSET,
+    width: PLUS_SIZE,
+    height: PLUS_SIZE,
+    borderRadius: PLUS_SIZE / 2,
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  ring: { borderWidth: 2, borderRadius: 18, padding: 2, alignSelf: 'flex-start' },
+  ring: {
+    borderWidth: RING_BORDER,
+    borderRadius: STORY_AVATAR / 2 + RING_BORDER + RING_INSET,
+    padding: RING_INSET,
+    alignSelf: 'flex-start',
+  },
   nameWrap: { alignSelf: 'stretch' },
 });

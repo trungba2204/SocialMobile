@@ -55,7 +55,7 @@ export function PostCard({
   const meta = [post.feeling, post.location].filter(Boolean).join(' · ');
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.card }]}>
+    <View style={[styles.container, { backgroundColor: theme.colors.card, marginBottom: theme.space.sm }]}>
       <View style={[styles.hairline, { backgroundColor: theme.colors[HAIRLINE[post.privacy]] }]} />
       <View style={styles.content}>
         <View style={{ padding: theme.space.lg, gap: theme.space.md }}>
@@ -76,7 +76,7 @@ export function PostCard({
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="More options"
+              accessibilityLabel="Open post"
               hitSlop={theme.hitSlop}
               onPress={onPressPost}
             >
@@ -114,7 +114,7 @@ export function PostCard({
 }
 
 const styles = StyleSheet.create({
-  container: { width: '100%', flexDirection: 'row', alignItems: 'stretch', marginBottom: 8 },
+  container: { width: '100%', flexDirection: 'row', alignItems: 'stretch' },
   hairline: { width: 3 },
   content: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },

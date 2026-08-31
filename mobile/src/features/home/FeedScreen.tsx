@@ -22,10 +22,10 @@ const SKELETON_ROWS = [0, 1, 2, 3, 4];
 function SkeletonRow() {
   const theme = useTheme();
   return (
-    <View style={[styles.skeleton, { padding: theme.space.lg, gap: theme.space.md }]}>
+    <View style={{ padding: theme.space.lg, gap: theme.space.md }}>
       <View style={[styles.skeletonHead, { gap: theme.space.md }]}>
         <Skeleton width={42} height={42} radius={21} />
-        <View style={{ gap: 6 }}>
+        <View style={{ gap: theme.space.xs }}>
           <Skeleton width={140} height={12} />
           <Skeleton width={80} height={10} />
         </View>
@@ -172,6 +172,5 @@ export function FeedScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  skeleton: {},
   skeletonHead: { flexDirection: 'row', alignItems: 'center' },
 });

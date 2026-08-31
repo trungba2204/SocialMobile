@@ -11,7 +11,8 @@ export type PostMediaGridProps = {
   onPress?: () => void;
 };
 
-const GAP = 2;
+// Hairline gutter between media tiles — deliberately sub-token (tighter than space.xs).
+const TILE_GAP = 2;
 
 function Tile({ item, style }: { item: PostMediaDto; style?: object }) {
   const theme = useTheme();
@@ -26,7 +27,7 @@ function Tile({ item, style }: { item: PostMediaDto; style?: object }) {
       />
       {item.type === 'VIDEO' ? (
         <View style={[styles.playWrap, { backgroundColor: theme.colors.overlay }]}>
-          <Play size={22} color="#FFFFFF" fill="#FFFFFF" />
+          <Play size={22} color={theme.colors.onPrimary} fill={theme.colors.onPrimary} />
         </View>
       ) : null}
     </View>
@@ -83,8 +84,8 @@ export function PostMediaGrid({ media, onPress }: PostMediaGridProps) {
 
 const styles = StyleSheet.create({
   container: { width: '100%', overflow: 'hidden' },
-  row: { flexDirection: 'row', gap: GAP },
-  col: { flexDirection: 'column', gap: GAP },
+  row: { flexDirection: 'row', gap: TILE_GAP },
+  col: { flexDirection: 'column', gap: TILE_GAP },
   flex: { flex: 1 },
   tile: { overflow: 'hidden', position: 'relative' },
   playWrap: {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Image, View } from 'react-native';
 import { useTheme } from '@/theme/useTheme';
 import { Text } from '@/components/Text';
+import { resolveMediaUrl } from '@/lib/resolveMediaUrl';
 
 export type AvatarProps = {
   uri?: string | null;
@@ -23,12 +24,13 @@ export function initialsFor(name: string): string {
 export function Avatar({ uri, name, size }: AvatarProps) {
   const theme = useTheme();
   const [failed, setFailed] = useState(false);
-  const showImage = !!uri && !failed;
+  const src = uri ? resolveMediaUrl(uri) : null;
+  const showImage = !!src && !failed;
 
   if (showImage) {
     return (
       <Image
-        source={{ uri: uri! }}
+        source={{ uri: src! }}
         onError={() => setFailed(true)}
         accessibilityLabel={`${name} avatar`}
         accessibilityRole="image"
