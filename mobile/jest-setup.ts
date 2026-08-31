@@ -52,6 +52,7 @@ jest.mock('expo-haptics', () => ({
   ImpactFeedbackStyle: { Light: 'light', Medium: 'medium', Heavy: 'heavy' },
   NotificationFeedbackType: { Success: 'success', Warning: 'warning', Error: 'error' },
 }));
+jest.mock('expo-image', () => ({ Image: require('react-native').Image }));
 jest.mock('expo-font', () => ({
   ...jest.requireActual('expo-font'),
   useFonts: () => [true, null],
