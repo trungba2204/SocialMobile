@@ -7,6 +7,13 @@ import { Text } from '@/components/Text';
 import { Badge } from '@/components/Badge';
 import { useUiStore } from '@/store/useUiStore';
 
+// Raised Create pill — dimensions and negative offset have no theme token.
+const CREATE_PILL_WIDTH = 54;
+const CREATE_PILL_HEIGHT = 38;
+const CREATE_PILL_LIFT = -14; // pulls the pill above the bar's top edge
+const BADGE_OFFSET_TOP = -6;
+const BADGE_OFFSET_RIGHT = -10;
+
 const ICONS: Record<string, LucideIcon> = {
   HomeTab: Home,
   FriendsTab: Users,
@@ -35,6 +42,7 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
         {
           backgroundColor: theme.colors.surface,
           borderTopColor: theme.colors.border,
+          paddingTop: theme.space.sm,
           paddingBottom: Math.max(insets.bottom, theme.space.sm),
         },
       ]}
@@ -44,17 +52,15 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
         const Icon = ICONS[route.name] ?? Home;
         const isCreate = route.name === 'CreateTab';
 
+        // For every slot (Create included) we only emit `tabPress`. The MainTabs
+        // `CreateTab` listener is the single owner of navigating to `CreatePost`.
         const onPress = () => {
           const event = navigation.emit({
             type: 'tabPress',
             target: route.key,
             canPreventDefault: true,
           });
-          if (isCreate) {
-            navigation.getParent()?.navigate('CreatePost');
-            return;
-          }
-          if (!focused && !event.defaultPrevented) {
+          if (!isCreate && !focused && !event.defaultPrevented) {
             navigation.navigate(route.name as never);
           }
         };
@@ -72,7 +78,7 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
                 <View
                   style={[styles.createPillAccent, { backgroundColor: theme.colors.accent }]}
                 />
-                <Plus size={26} color="#FFFFFF" strokeWidth={2.5} />
+                <Plus size={26} color={theme.colors.onPrimary} strokeWidth={2.5} />
               </View>
             </Pressable>
           );
@@ -112,25 +118,24 @@ const styles = StyleSheet.create({
   bar: {
     flexDirection: 'row',
     borderTopWidth: StyleSheet.hairlineWidth,
-    paddingTop: 8,
   },
   slot: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 3 },
-  badge: { position: 'absolute', top: -6, right: -10 },
+  badge: { position: 'absolute', top: BADGE_OFFSET_TOP, right: BADGE_OFFSET_RIGHT },
   createPill: {
-    width: 54,
-    height: 38,
+    width: CREATE_PILL_WIDTH,
+    height: CREATE_PILL_HEIGHT,
     borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-    marginTop: -14,
+    marginTop: CREATE_PILL_LIFT,
   },
   createPillAccent: {
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
-    height: 19,
+    height: CREATE_PILL_HEIGHT / 2,
     opacity: 0.55,
   },
 });

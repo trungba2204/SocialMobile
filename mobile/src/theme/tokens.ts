@@ -14,6 +14,8 @@ export const lightColors = {
   warning: '#F59E0B',
   error: '#E5484D',
   overlay: 'rgba(11,11,16,0.45)',
+  // Foreground on always-saturated surfaces (Create pill / gradient). Constant across schemes.
+  onPrimary: '#FFFFFF',
   gradientCreate: ['#5B4BE0', '#22D3EE'] as const,
 };
 
@@ -33,6 +35,7 @@ export const darkColors: typeof lightColors = {
   warning: '#FBBF24',
   error: '#F87171',
   overlay: 'rgba(0,0,0,0.6)',
+  onPrimary: '#FFFFFF',
   gradientCreate: ['#5B4BE0', '#22D3EE'] as const,
 };
 

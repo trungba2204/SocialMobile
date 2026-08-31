@@ -4,6 +4,7 @@ import { ScreenContainer } from '@/components/ScreenContainer';
 import { Logo } from '@/components/Logo';
 import { useTheme } from '@/theme/useTheme';
 import { useAuthStore } from '@/store/useAuthStore';
+import { space } from '@/theme/tokens';
 
 export function SplashScreen() {
   const theme = useTheme();
@@ -24,5 +25,5 @@ export function SplashScreen() {
 
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  spinner: { marginTop: 24 },
+  spinner: { marginTop: space.xl },
 });
