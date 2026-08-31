@@ -1,22 +1,17 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { NavigationContainer } from '@react-navigation/native';
 import { ThemeProvider } from '@/theme/ThemeProvider';
 import { useTheme } from '@/theme/useTheme';
-import { Text } from '@/components/Text';
 import { ToastHost } from '@/components/Toast';
+import { RootNavigator } from '@/navigation/RootNavigator';
+import { linking } from '@/navigation/linking';
 
-function Root() {
+function ThemedStatusBar() {
   const theme = useTheme();
-  return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Text variant="display" color="primary">
-        orbit
-      </Text>
-      <StatusBar style={theme.scheme === 'dark' ? 'light' : 'dark'} />
-    </View>
-  );
+  return <StatusBar style={theme.scheme === 'dark' ? 'light' : 'dark'} />;
 }
 
 export default function App() {
@@ -24,8 +19,11 @@ export default function App() {
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
         <ThemeProvider>
-          <Root />
+          <NavigationContainer linking={linking}>
+            <RootNavigator />
+          </NavigationContainer>
           <ToastHost />
+          <ThemedStatusBar />
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
@@ -35,10 +33,5 @@ export default function App() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-  },
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });

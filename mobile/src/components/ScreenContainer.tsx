@@ -21,6 +21,7 @@ export type ScreenContainerProps = {
   onRefresh?: () => void;
   contentContainerStyle?: StyleProp<ViewStyle>;
   padded?: boolean;
+  testID?: string;
 };
 
 export function ScreenContainer({
@@ -32,6 +33,7 @@ export function ScreenContainer({
   onRefresh,
   contentContainerStyle,
   padded = false,
+  testID,
 }: ScreenContainerProps) {
   const theme = useTheme();
   const pad = padded ? { padding: theme.space.lg } : null;
@@ -70,7 +72,11 @@ export function ScreenContainer({
   );
 
   return (
-    <SafeAreaView style={[styles.flex, { backgroundColor: theme.colors.background }]} edges={edges}>
+    <SafeAreaView
+      testID={testID}
+      style={[styles.flex, { backgroundColor: theme.colors.background }]}
+      edges={edges}
+    >
       {withKeyboard}
     </SafeAreaView>
   );
