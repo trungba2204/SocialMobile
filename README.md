@@ -28,8 +28,17 @@ user profiles & avatars, post CRUD / feed / like / share, threaded comments,
 friend requests & suggestions, notifications, user & post search, local media
 storage, dev seed data. 80+ tests green; verified booting against MySQL.
 
-Remaining milestones: M1-Mobile (client), M2 Stories, M3 Messaging (REST),
-M4 real-time (STOMP), M5 polish. See `docs/superpowers/`.
+**Milestone 1 (mobile): complete** — full Expo/React Native client: auth flow,
+home feed, post detail + threaded comments, create post (text + photos), friends
+(requests / friends / suggestions), search (people + posts), notifications with
+tap-through routing, profile + edit profile, settings (appearance + logout),
+design system (light + dark), typed navigation. Stories and Messages ship as
+complete mock-data UI pending their milestones. 36 Jest suites / 107 tests green;
+`tsc --noEmit` clean; `expo export` bundles; API contracts verified end-to-end
+against the seeded backend. See [`mobile/README.md`](mobile/README.md).
+
+Remaining milestones: M2 Stories, M3 Messaging (REST), M4 real-time (STOMP),
+M5 polish. See `docs/superpowers/`.
 
 ## Quick start (backend)
 
