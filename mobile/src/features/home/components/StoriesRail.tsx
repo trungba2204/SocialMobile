@@ -59,26 +59,26 @@ export function StoriesRail() {
         </Text>
       </PressableScale>
 
-      {MOCK_STORIES.map((story, i) => (
+      {MOCK_STORIES.map((reel, i) => (
         <PressableScale
-          key={story.id}
+          key={reel.author.id}
           accessibilityRole="button"
-          accessibilityLabel={`${story.authorName}'s story`}
-          onPress={() => navigation.navigate('StoryViewer', { userIndex: i + 1 })}
+          accessibilityLabel={`${reel.author.name}'s story`}
+          onPress={() => navigation.navigate('StoryViewer', { userIndex: i })}
           style={[styles.card, { borderRadius: theme.radius.lg, padding: theme.space.sm, overflow: 'hidden' }]}
         >
           <Image
-            source={{ uri: resolveMediaUrl(story.imageUrl) }}
+            source={{ uri: resolveMediaUrl(reel.stories[0]!.imageUrl) }}
             contentFit="cover"
             style={StyleSheet.absoluteFill}
-            accessibilityLabel={`${story.authorName} story`}
+            accessibilityLabel={`${reel.author.name} story`}
           />
           <View style={[styles.ring, { borderColor: theme.colors.accent }]}>
-            <Avatar uri={story.avatarUrl} name={story.authorName} size={STORY_AVATAR} />
+            <Avatar uri={reel.author.avatarUrl} name={reel.author.name} size={STORY_AVATAR} />
           </View>
           <View style={styles.nameWrap}>
             <Text variant="metadata" color="surface" numberOfLines={1}>
-              {story.authorName.split(' ')[0]}
+              {reel.author.name.split(' ')[0]}
             </Text>
           </View>
         </PressableScale>

@@ -1,54 +1,43 @@
-// M2: mock until Story API — no backend Story endpoints exist in M1.
+// M2: stories are mock data until the Story API ships — no backend Story endpoints exist in M1.
 
 export interface MockStory {
   id: string;
-  authorName: string;
-  avatarUrl: string;
   imageUrl: string;
   durationMs: number;
 }
 
-export const MOCK_STORIES: MockStory[] = [
-  {
-    id: 's1',
-    authorName: 'Maya Okafor',
-    avatarUrl: 'https://i.pravatar.cc/150?img=47',
-    imageUrl: 'https://picsum.photos/seed/orbit-story-1/600/1000',
-    durationMs: 5000,
-  },
-  {
-    id: 's2',
-    authorName: 'Devin Park',
-    avatarUrl: 'https://i.pravatar.cc/150?img=12',
-    imageUrl: 'https://picsum.photos/seed/orbit-story-2/600/1000',
-    durationMs: 5000,
-  },
-  {
-    id: 's3',
-    authorName: 'Lena Fischer',
-    avatarUrl: 'https://i.pravatar.cc/150?img=32',
-    imageUrl: 'https://picsum.photos/seed/orbit-story-3/600/1000',
-    durationMs: 5000,
-  },
-  {
-    id: 's4',
-    authorName: 'Theo Nakamura',
-    avatarUrl: 'https://i.pravatar.cc/150?img=15',
-    imageUrl: 'https://picsum.photos/seed/orbit-story-4/600/1000',
-    durationMs: 5000,
-  },
-  {
-    id: 's5',
-    authorName: 'Priya Anand',
-    avatarUrl: 'https://i.pravatar.cc/150?img=45',
-    imageUrl: 'https://picsum.photos/seed/orbit-story-5/600/1000',
-    durationMs: 5000,
-  },
-  {
-    id: 's6',
-    authorName: 'Sam Reyes',
-    avatarUrl: 'https://i.pravatar.cc/150?img=8',
-    imageUrl: 'https://picsum.photos/seed/orbit-story-6/600/1000',
-    durationMs: 5000,
-  },
+export interface MockStoryAuthor {
+  id: string;
+  name: string;
+  avatarUrl: string;
+}
+
+export interface MockStoryReel {
+  author: MockStoryAuthor;
+  stories: MockStory[];
+}
+
+function reel(
+  id: string,
+  name: string,
+  img: number,
+  seeds: string[],
+): MockStoryReel {
+  return {
+    author: { id, name, avatarUrl: `https://i.pravatar.cc/150?img=${img}` },
+    stories: seeds.map((seed, i) => ({
+      id: `${id}-${i + 1}`,
+      imageUrl: `https://picsum.photos/seed/${seed}/600/1000`,
+      durationMs: 4000,
+    })),
+  };
+}
+
+export const MOCK_STORIES: MockStoryReel[] = [
+  reel('maya', 'Maya Okafor', 47, ['orbit-maya-1', 'orbit-maya-2', 'orbit-maya-3']),
+  reel('devin', 'Devin Park', 12, ['orbit-devin-1', 'orbit-devin-2']),
+  reel('lena', 'Lena Fischer', 32, ['orbit-lena-1', 'orbit-lena-2', 'orbit-lena-3']),
+  reel('theo', 'Theo Nakamura', 15, ['orbit-theo-1', 'orbit-theo-2']),
+  reel('priya', 'Priya Anand', 45, ['orbit-priya-1', 'orbit-priya-2', 'orbit-priya-3']),
+  reel('sam', 'Sam Reyes', 8, ['orbit-sam-1', 'orbit-sam-2']),
 ];
