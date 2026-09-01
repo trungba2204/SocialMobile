@@ -16,6 +16,7 @@ export type HomeStackParamList = {
 export type FriendsStackParamList = {
   FriendsHome: undefined;
   UserProfile: { userId: number };
+  PostDetail: { postId: number };
 };
 
 export type NotificationsStackParamList = {
@@ -29,6 +30,7 @@ export type ProfileStackParamList = {
   UserProfile: { userId: number };
   EditProfile: undefined;
   Settings: undefined;
+  PostDetail: { postId: number };
 };
 
 export type SearchStackParamList = {

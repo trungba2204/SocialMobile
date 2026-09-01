@@ -35,6 +35,7 @@ function FriendsNavigator() {
     <FriendsStack.Navigator screenOptions={{ headerShown: false }}>
       <FriendsStack.Screen name="FriendsHome" component={FriendsScreen} />
       <FriendsStack.Screen name="UserProfile" component={ProfileScreen} />
+      <FriendsStack.Screen name="PostDetail" component={PostDetailScreen} />
     </FriendsStack.Navigator>
   );
 }
@@ -58,6 +59,7 @@ function ProfileNavigator() {
       <ProfileStack.Screen name="UserProfile" component={ProfileScreen} />
       <ProfileStack.Screen name="EditProfile" component={EditProfileScreen} />
       <ProfileStack.Screen name="Settings" component={SettingsScreen} />
+      <ProfileStack.Screen name="PostDetail" component={PostDetailScreen} />
     </ProfileStack.Navigator>
   );
 }
