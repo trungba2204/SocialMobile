@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -45,9 +45,18 @@ export function FeedScreen() {
   const { items, loading, refreshing, error, endReached, refresh, loadMore, setItems } =
     usePagedQuery<PostDto>((page) => posts.feed(page));
 
+  const firstFocus = useRef(true);
+
   useFocusEffect(
     useCallback(() => {
       let active = true;
+      // Refetch the feed when returning to it (e.g. after publishing a post),
+      // but not on the initial mount — usePagedQuery already loads page 0 then.
+      if (firstFocus.current) {
+        firstFocus.current = false;
+      } else {
+        refresh();
+      }
       notifications
         .list(0)
         .then(({ unread }) => {
@@ -57,7 +66,7 @@ export function FeedScreen() {
       return () => {
         active = false;
       };
-    }, []),
+    }, [refresh]),
   );
 
   const patch = useCallback(

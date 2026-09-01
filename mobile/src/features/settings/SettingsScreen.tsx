@@ -40,6 +40,7 @@ export function SettingsScreen() {
 
   const onConfirmLogout = async () => {
     setLoggingOut(true);
+    setLogoutOpen(false);
     const refreshToken = await getRefreshToken();
     if (refreshToken) {
       await authApi.logout(refreshToken).catch(() => {});
