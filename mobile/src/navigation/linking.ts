@@ -43,7 +43,11 @@ export const linking: LinkingOptions<RootStackParamList> = {
       Messages: {
         screens: {
           ConversationList: 'messages',
-          Chat: 'messages/:conversationId',
+          Chat: {
+            path: 'messages/:conversationId',
+            parse: { conversationId: (v: string) => Number(v) },
+            stringify: { conversationId: (v: number) => String(v) },
+          },
         },
       },
       StoryViewer: 'stories/:userIndex',

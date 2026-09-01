@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
@@ -15,6 +15,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useUiStore } from '@/store/useUiStore';
 import { validateBio, validateDisplayName } from '@/lib/validation';
 import { resolveMediaUrl } from '@/lib/resolveMediaUrl';
+import { toApiError } from '@/api/errors';
 import type { PickedAsset } from '@/api/media';
 import * as users from '@/api/users';
 import { COVER_HEIGHT } from './components/ProfileHeader';
@@ -58,29 +59,40 @@ export function EditProfileScreen() {
     return toPickedAsset(result.assets[0]);
   };
 
+  const uploadErrorMessage = (e: unknown, fallback: string) => {
+    const err = toApiError(e);
+    // Backend rejects non-image uploads with 400 — surface that reason.
+    if (err.status === 400) return err.message || 'That file is not a supported image';
+    return fallback;
+  };
+
   const onPickAvatar = async () => {
+    if (uploadingAvatar || uploadingCover) return;
     const asset = await pick();
     if (!asset) return;
     setUploadingAvatar(true);
     try {
       const { url } = await users.uploadAvatar(asset);
+      // Display the server-returned url (via Avatar/resolveMediaUrl), never the local picker uri.
       patchUser({ avatarUrl: url });
-    } catch {
-      showToast({ message: 'Could not upload photo', tone: 'error' });
+    } catch (e) {
+      // Upload failed — surface a toast, do NOT patch the user.
+      showToast({ message: uploadErrorMessage(e, 'Could not upload photo'), tone: 'error' });
     } finally {
       setUploadingAvatar(false);
     }
   };
 
   const onPickCover = async () => {
+    if (uploadingAvatar || uploadingCover) return;
     const asset = await pick();
     if (!asset) return;
     setUploadingCover(true);
     try {
       const { url } = await users.uploadCover(asset);
       setCoverUrl(url);
-    } catch {
-      showToast({ message: 'Could not upload cover', tone: 'error' });
+    } catch (e) {
+      showToast({ message: uploadErrorMessage(e, 'Could not upload cover'), tone: 'error' });
     } finally {
       setUploadingCover(false);
     }
@@ -108,6 +120,7 @@ export function EditProfileScreen() {
         accessibilityRole="button"
         accessibilityLabel="Change cover photo"
         onPress={onPickCover}
+        disabled={uploadingCover || uploadingAvatar}
         style={[styles.cover, { height: COVER_HEIGHT, backgroundColor: theme.colors.primaryMuted }]}
       >
         {coverUrl ? (
@@ -118,7 +131,11 @@ export function EditProfileScreen() {
           />
         ) : null}
         <View style={[styles.coverBadge, { gap: theme.space.xs }]}>
-          <Camera size={18} color={theme.colors.onPrimary} />
+          {uploadingCover ? (
+            <ActivityIndicator testID="cover-uploading" size="small" color={theme.colors.onPrimary} />
+          ) : (
+            <Camera size={18} color={theme.colors.onPrimary} />
+          )}
           <Text variant="metadata" color="onPrimary">
             {uploadingCover ? 'Uploading…' : 'Edit cover'}
           </Text>
@@ -130,11 +147,15 @@ export function EditProfileScreen() {
           accessibilityRole="button"
           accessibilityLabel="Change profile photo"
           onPress={onPickAvatar}
+          disabled={uploadingAvatar || uploadingCover}
           style={[styles.avatarRow, { marginTop: -AVATAR_SIZE / 2 - theme.space.lg, gap: theme.space.md }]}
         >
           <View style={[styles.avatarWrap, { borderColor: theme.colors.background }]}>
             <Avatar uri={user?.avatarUrl} name={user?.displayName ?? ''} size={AVATAR_SIZE} />
           </View>
+          {uploadingAvatar ? (
+            <ActivityIndicator testID="avatar-uploading" size="small" color={theme.colors.primary} />
+          ) : null}
           <Text variant="button" color="primary">
             {uploadingAvatar ? 'Uploading…' : 'Change photo'}
           </Text>

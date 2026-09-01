@@ -41,7 +41,8 @@ export function ChatScreen() {
   const theme = useTheme();
   const navigation = useNavigation<any>();
   const { params } = useRoute<ChatRoute>();
-  const conversationId = params.conversationId;
+  // Deep links deliver params as strings; coerce so the API gets a number.
+  const conversationId = Number(params.conversationId);
   const showToast = useUiStore((s) => s.showToast);
 
   const {
@@ -54,17 +55,38 @@ export function ChatScreen() {
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState<ApiError | null>(null);
   const inFlight = useRef(false);
+  const prevIds = useRef<Set<number>>(new Set());
+
+  const sendInFlight = useRef(false);
 
   const loadMessages = useCallback(async () => {
-    if (inFlight.current) return;
+    if (inFlight.current || sendInFlight.current) return;
     inFlight.current = true;
     try {
       const res = await conversations.messages(conversationId, 0);
       setListError(null);
+      const me = useAuthStore.getState().user;
       setMessages((prev) => {
-        // keep any un-reconciled optimistic (negative id) messages on top
-        const optimistic = prev.filter((m) => m.id < 0);
-        return [...optimistic, ...res.content];
+        const serverIds = new Set(res.content.map((m) => m.id));
+        const newestServerAt =
+          res.content.length > 0
+            ? Math.max(...res.content.map((m) => Date.parse(m.createdAt)))
+            : 0;
+        // Keep un-reconciled optimistic (negative id) messages, plus any
+        // just-saved (positive id) client messages that the server page hasn't
+        // caught up to yet — otherwise a poll mid-send briefly drops them.
+        const pending = prev.filter(
+          (m) =>
+            !serverIds.has(m.id) &&
+            (m.id < 0 || Date.parse(m.createdAt) >= newestServerAt),
+        );
+        // If the poll surfaced NEW peer messages, clear the unread badge now.
+        const hasNewPeerMsg = res.content.some(
+          (m) => !prevIds.current.has(m.id) && m.sender.id !== me?.id,
+        );
+        prevIds.current = serverIds;
+        if (hasNewPeerMsg) conversations.markRead(conversationId).catch(() => undefined);
+        return [...pending, ...res.content];
       });
     } catch (e) {
       setListError(toApiError(e));
@@ -107,6 +129,7 @@ export function ChatScreen() {
         createdAt: new Date().toISOString(),
       };
       setMessages((prev) => [optimistic, ...prev]);
+      sendInFlight.current = true;
       try {
         const saved = await conversations.send(conversationId, text);
         setMessages((prev) => [saved, ...prev.filter((m) => m.id !== tempId)]);
@@ -114,6 +137,8 @@ export function ChatScreen() {
       } catch {
         setMessages((prev) => prev.filter((m) => m.id !== tempId));
         showToast({ message: 'Message failed to send', tone: 'error' });
+      } finally {
+        sendInFlight.current = false;
       }
     },
     [conversationId, markRead, showToast],
