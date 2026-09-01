@@ -30,6 +30,12 @@ export type ProfileStackParamList = {
   UserProfile: { userId: number };
   EditProfile: undefined;
   Settings: undefined;
+  AccountSettings: undefined;
+  PrivacySettings: undefined;
+  SecuritySettings: undefined;
+  NotificationSettings: undefined;
+  BlockedUsers: undefined;
+  HelpCenter: undefined;
   PostDetail: { postId: number };
 };
 
