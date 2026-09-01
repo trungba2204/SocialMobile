@@ -188,6 +188,32 @@ CREATE TABLE conversation_members (
   CONSTRAINT fk_conversation_members_user FOREIGN KEY (user_id) REFERENCES users (id)
 ) ENGINE=InnoDB;
 
+CREATE TABLE stories (
+  id         BIGINT       NOT NULL AUTO_INCREMENT,
+  author_id  BIGINT       NOT NULL,
+  media_url  VARCHAR(300) NOT NULL,
+  caption    VARCHAR(200) NULL,
+  expires_at DATETIME(6)  NOT NULL,
+  created_at DATETIME(6)  NOT NULL,
+  updated_at DATETIME(6)  NOT NULL,
+  PRIMARY KEY (id),
+  KEY ix_stories_author_expires (author_id, expires_at),
+  CONSTRAINT fk_stories_author FOREIGN KEY (author_id) REFERENCES users (id)
+) ENGINE=InnoDB;
+
+CREATE TABLE story_views (
+  id         BIGINT      NOT NULL AUTO_INCREMENT,
+  story_id   BIGINT      NOT NULL,
+  viewer_id  BIGINT      NOT NULL,
+  created_at DATETIME(6) NOT NULL,
+  updated_at DATETIME(6) NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_story_view (story_id, viewer_id),
+  KEY ix_story_views_story (story_id),
+  CONSTRAINT fk_story_views_story  FOREIGN KEY (story_id)  REFERENCES stories (id),
+  CONSTRAINT fk_story_views_viewer FOREIGN KEY (viewer_id) REFERENCES users (id)
+) ENGINE=InnoDB;
+
 CREATE TABLE messages (
   id              BIGINT        NOT NULL AUTO_INCREMENT,
   conversation_id BIGINT        NOT NULL,

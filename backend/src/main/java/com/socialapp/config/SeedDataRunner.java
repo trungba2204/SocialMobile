@@ -22,6 +22,8 @@ import com.socialapp.post.comment.Comment;
 import com.socialapp.post.comment.CommentRepository;
 import com.socialapp.post.like.PostLike;
 import com.socialapp.post.like.PostLikeRepository;
+import com.socialapp.story.Story;
+import com.socialapp.story.StoryRepository;
 import com.socialapp.user.Role;
 import com.socialapp.user.RoleRepository;
 import com.socialapp.user.User;
@@ -34,6 +36,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -88,6 +92,7 @@ public class SeedDataRunner implements ApplicationRunner {
     private final ConversationRepository conversations;
     private final ConversationMemberRepository conversationMembers;
     private final MessageRepository messages;
+    private final StoryRepository stories;
     private final PasswordEncoder passwordEncoder;
     private final SeedProperties properties;
 
@@ -96,6 +101,7 @@ public class SeedDataRunner implements ApplicationRunner {
                           FriendshipRepository friendships, FriendRequestRepository friendRequests,
                           NotificationRepository notifications, ConversationRepository conversations,
                           ConversationMemberRepository conversationMembers, MessageRepository messages,
+                          StoryRepository stories,
                           PasswordEncoder passwordEncoder,
                           SeedProperties properties) {
         this.users = users;
@@ -109,6 +115,7 @@ public class SeedDataRunner implements ApplicationRunner {
         this.conversations = conversations;
         this.conversationMembers = conversationMembers;
         this.messages = messages;
+        this.stories = stories;
         this.passwordEncoder = passwordEncoder;
         this.properties = properties;
     }
@@ -131,6 +138,7 @@ public class SeedDataRunner implements ApplicationRunner {
         seedGraph(people);
         seedNotifications(people, allPosts);
         seedConversations(people);
+        seedStories(people);
 
         log.info("Seed complete: {} users, {} posts", people.size(), allPosts.size());
     }
@@ -257,6 +265,19 @@ public class SeedDataRunner implements ApplicationRunner {
             }
             conversationMembers.save(aliceMember);
             conversationMembers.save(peerMember);
+        }
+    }
+
+    private void seedStories(List<User> people) {
+        // Active stories across alice's friends (ben/chloe/deepak/elena/felix).
+        int[] authorIdx = {1, 2, 3, 4, 5, 1};
+        String[] captions = {"Morning light", "On the trail", null, "Studio day", "New print", null};
+        for (int i = 0; i < authorIdx.length; i++) {
+            Story story = new Story(people.get(authorIdx[i]).getId(),
+                    "https://picsum.photos/seed/story" + i + "/600/900",
+                    captions[i],
+                    Instant.now().plus(Duration.ofHours(20)));
+            stories.save(story);
         }
     }
 
