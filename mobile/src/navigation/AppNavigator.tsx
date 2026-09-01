@@ -8,6 +8,7 @@ import { MainTabs } from './MainTabs';
 import { CreatePostScreen } from '@/features/post/CreatePostScreen';
 import { SearchScreen } from '@/features/search/SearchScreen';
 import { ProfileScreen } from '@/features/profile/ProfileScreen';
+import { PostDetailScreen } from '@/features/home/PostDetailScreen';
 import { ConversationListScreen } from '@/features/messages/ConversationListScreen';
 import { ChatScreen } from '@/features/messages/ChatScreen';
 import { StoryViewerScreen } from '@/features/stories/StoryViewerScreen';
@@ -19,6 +20,7 @@ function SearchNavigator() {
     <SearchStack.Navigator screenOptions={{ headerShown: false }}>
       <SearchStack.Screen name="Search" component={SearchScreen} />
       <SearchStack.Screen name="UserProfile" component={ProfileScreen} />
+      <SearchStack.Screen name="PostDetail" component={PostDetailScreen} />
     </SearchStack.Navigator>
   );
 }

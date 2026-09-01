@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SearchX } from 'lucide-react-native';
 import { useTheme } from '@/theme/useTheme';
 import { Text } from '@/components/Text';
@@ -15,6 +16,8 @@ import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { usePagedQuery } from '@/hooks/usePagedQuery';
 import * as search from '@/api/search';
 import * as recentSearches from '@/lib/recentSearches';
+import { useUiStore } from '@/store/useUiStore';
+import type { SearchStackParamList } from '@/navigation/types';
 import type { PostDto, UserDto } from '@/api/types';
 import { PostCard } from '@/features/home/components/PostCard';
 import { RecentSearches } from './components/RecentSearches';
@@ -52,7 +55,9 @@ function SkeletonList() {
 
 export function SearchScreen() {
   const theme = useTheme();
-  const navigation = useNavigation<any>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<SearchStackParamList>>();
+  const showToast = useUiStore((s) => s.showToast);
   const [query, setQuery] = useState('');
   const [tab, setTab] = useState<TabKey>('people');
   const [recents, setRecents] = useState<string[]>([]);
@@ -87,13 +92,22 @@ export function SearchScreen() {
   const onPressPost = useCallback(
     (post: PostDto) => {
       record(trimmed);
-      // PostDetail lives in HomeStack (a different navigator). Attempt the
-      // cross-stack navigation; React Navigation resolves it up the tree when
-      // possible. See task-13 report for the M1 limitation note.
       navigation.navigate('PostDetail', { postId: post.id });
     },
     [navigation, record, trimmed],
   );
+
+  const onPressPostAuthor = useCallback(
+    (post: PostDto) => {
+      record(trimmed);
+      navigation.navigate('UserProfile', { userId: post.author.id });
+    },
+    [navigation, record, trimmed],
+  );
+
+  const onLikeInSearch = useCallback(() => {
+    showToast({ message: 'Open the post to react', tone: 'neutral' });
+  }, [showToast]);
 
   return (
     <SafeAreaView
@@ -135,7 +149,13 @@ export function SearchScreen() {
           {tab === 'people' ? (
             <PeopleResults key={`people:${trimmed}`} q={trimmed} onPressUser={onPressUser} />
           ) : (
-            <PostResults key={`posts:${trimmed}`} q={trimmed} onPressPost={onPressPost} />
+            <PostResults
+              key={`posts:${trimmed}`}
+              q={trimmed}
+              onPressPost={onPressPost}
+              onPressAuthor={onPressPostAuthor}
+              onLike={onLikeInSearch}
+            />
           )}
         </>
       ) : (
@@ -196,9 +216,13 @@ function PeopleResults({
 function PostResults({
   q,
   onPressPost,
+  onPressAuthor,
+  onLike,
 }: {
   q: string;
   onPressPost: (post: PostDto) => void;
+  onPressAuthor: (post: PostDto) => void;
+  onLike: () => void;
 }) {
   const { items, loading, error, endReached, refresh, loadMore } = usePagedQuery<PostDto>(
     useCallback((page) => search.posts(q, page), [q]),
@@ -216,8 +240,8 @@ function PostResults({
         <PostCard
           post={item}
           onPressPost={() => onPressPost(item)}
-          onPressAuthor={() => onPressPost(item)}
-          onToggleLike={() => undefined}
+          onPressAuthor={() => onPressAuthor(item)}
+          onToggleLike={onLike}
           onPressComments={() => onPressPost(item)}
           onShare={() => onPressPost(item)}
         />

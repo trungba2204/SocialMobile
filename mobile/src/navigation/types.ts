@@ -34,6 +34,7 @@ export type ProfileStackParamList = {
 export type SearchStackParamList = {
   Search: undefined;
   UserProfile: { userId: number };
+  PostDetail: { postId: number };
 };
 
 export type MessagesStackParamList = {
