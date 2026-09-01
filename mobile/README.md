@@ -49,6 +49,10 @@ The value is read in `app.config.ts` and exposed via `expo-constants` as
 | `npx expo lint` | Lint (scaffolds `eslint-config-expo` on first run) |
 | `npx expo export --platform ios` | Verify the whole app bundles |
 
+M1 verification: Jest + `tsc --noEmit` + `expo export`, plus a curl round-trip of
+the key API contracts (login, feed, notifications, friends, search, profile)
+against the seeded backend. There is no automated on-device / simulator E2E in M1.
+
 ## Architecture
 
 - `src/api/` — thin Axios modules per resource + `client.ts` (single-flight token
