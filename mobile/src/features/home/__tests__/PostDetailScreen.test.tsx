@@ -16,6 +16,7 @@ jest.mock('@react-navigation/native', () => ({
 }));
 
 const get = postsApi.get as jest.MockedFunction<typeof postsApi.get>;
+const likeFn = postsApi.like as jest.MockedFunction<typeof postsApi.like>;
 const list = commentsApi.list as jest.MockedFunction<typeof commentsApi.list>;
 const create = commentsApi.create as jest.MockedFunction<typeof commentsApi.create>;
 
@@ -75,6 +76,19 @@ describe('PostDetailScreen', () => {
     const { getByText } = await renderScreen();
     await waitFor(() => expect(getByText('Watching the rings align tonight.')).toBeTruthy());
     expect(getByText('Beautiful shot.')).toBeTruthy();
+  });
+
+  it('reverts the displayed like state when the like request fails', async () => {
+    likeFn.mockRejectedValue(new Error('nope'));
+    const { getByText, getByLabelText } = await renderScreen();
+    await waitFor(() => expect(getByText('Watching the rings align tonight.')).toBeTruthy());
+    expect(getByText('2')).toBeTruthy();
+
+    fireEvent.press(getByLabelText('Like'));
+
+    await waitFor(() => expect(likeFn).toHaveBeenCalledWith(1));
+    await waitFor(() => expect(getByLabelText('Like')).toBeTruthy());
+    expect(getByText('2')).toBeTruthy();
   });
 
   it('submits a new comment and shows it in the list', async () => {

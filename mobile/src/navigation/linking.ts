@@ -47,7 +47,6 @@ export const linking: LinkingOptions<RootStackParamList> = {
         },
       },
       StoryViewer: 'stories/:userIndex',
-      ImageViewer: 'image',
     },
   },
 };

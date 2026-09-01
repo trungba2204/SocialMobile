@@ -17,6 +17,7 @@ import { useResource } from '@/hooks/useResource';
 import { usePagedQuery } from '@/hooks/usePagedQuery';
 import * as users from '@/api/users';
 import * as friends from '@/api/friends';
+import * as posts from '@/api/posts';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useUiStore } from '@/store/useUiStore';
 import type { FriendStatus, PostDto } from '@/api/types';
@@ -76,6 +77,35 @@ export function ProfileScreen() {
     useCallback((page) => users.posts(targetId, page), [targetId]),
   );
 
+  const patchPost = useCallback(
+    (id: number, updater: (p: PostDto) => PostDto) => {
+      feed.setItems((prev) => prev.map((p) => (p.id === id ? updater(p) : p)));
+    },
+    [feed.setItems],
+  );
+
+  const onToggleLike = useCallback(
+    async (post: PostDto, next: boolean) => {
+      patchPost(post.id, (p) => ({
+        ...p,
+        likedByMe: next,
+        likeCount: p.likeCount + (next ? 1 : -1),
+      }));
+      try {
+        const res = next ? await posts.like(post.id) : await posts.unlike(post.id);
+        patchPost(post.id, (p) => ({ ...p, likedByMe: res.liked, likeCount: res.likeCount }));
+      } catch {
+        patchPost(post.id, (p) => ({
+          ...p,
+          likedByMe: post.likedByMe,
+          likeCount: post.likeCount,
+        }));
+        showToast({ message: 'Could not update like', tone: 'error' });
+      }
+    },
+    [patchPost, showToast],
+  );
+
   const onAddFriend = useCallback(() => {
     setStatusOverride('PENDING_OUT');
     friends.sendRequest(targetId).catch(() => {
@@ -129,14 +159,14 @@ export function ProfileScreen() {
         post={item}
         onPressPost={() => navigation.navigate('PostDetail', { postId: item.id })}
         onPressAuthor={() => navigation.navigate('UserProfile', { userId: item.author.id })}
-        onToggleLike={() =>
-          showToast({ message: 'Open the post to react', tone: 'neutral' })
-        }
+        onToggleLike={(next) => {
+          void onToggleLike(item, next);
+        }}
         onPressComments={() => navigation.navigate('PostDetail', { postId: item.id })}
         onShare={() => navigation.navigate('PostDetail', { postId: item.id })}
       />
     ),
-    [navigation, showToast],
+    [navigation, onToggleLike],
   );
 
   const About = profile ? (

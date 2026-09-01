@@ -19,7 +19,6 @@ interface AuthState {
   bootstrap(): Promise<void>;
   setSession(a: AuthResponse): Promise<void>;
   applyTokens(t: TokenPair): Promise<void>;
-  refreshCurrentUser(): Promise<void>;
   patchUser(p: Partial<UserDto>): void;
   signOut(): Promise<void>;
 }
@@ -55,11 +54,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     setAccessToken(t.accessToken);
     await setRefreshToken(t.refreshToken);
     set({ accessToken: t.accessToken });
-  },
-
-  refreshCurrentUser: async () => {
-    const user = await auth.me();
-    set({ user });
   },
 
   patchUser: (p) => {

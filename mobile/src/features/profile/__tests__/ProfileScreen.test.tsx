@@ -4,11 +4,13 @@ import { ThemeProvider } from '@/theme/ThemeProvider';
 import { ProfileScreen } from '@/features/profile/ProfileScreen';
 import * as usersApi from '@/api/users';
 import * as friendsApi from '@/api/friends';
+import * as postsApi from '@/api/posts';
 import { useAuthStore } from '@/store/useAuthStore';
 import type { Page, PostDto, UserProfileDto } from '@/api/types';
 
 jest.mock('@/api/users');
 jest.mock('@/api/friends');
+jest.mock('@/api/posts');
 
 const mockNavigate = jest.fn();
 jest.mock('@react-navigation/native', () => ({
@@ -21,6 +23,7 @@ const getProfile = usersApi.getProfile as jest.MockedFunction<typeof usersApi.ge
 const posts = usersApi.posts as jest.MockedFunction<typeof usersApi.posts>;
 const sendRequest = friendsApi.sendRequest as jest.MockedFunction<typeof friendsApi.sendRequest>;
 const remove = friendsApi.remove as jest.MockedFunction<typeof friendsApi.remove>;
+const like = postsApi.like as jest.MockedFunction<typeof postsApi.like>;
 
 const PROFILE: UserProfileDto = {
   id: 7,
@@ -77,6 +80,7 @@ describe('ProfileScreen (other user)', () => {
     getProfile.mockResolvedValue(PROFILE);
     posts.mockResolvedValue(page([POST]));
     remove.mockResolvedValue(undefined);
+    like.mockResolvedValue({ liked: true, likeCount: 1 });
     sendRequest.mockResolvedValue({
       id: 5,
       requester: { id: 1, username: 'me', displayName: 'Me', avatarUrl: null, bio: null },
@@ -93,6 +97,17 @@ describe('ProfileScreen (other user)', () => {
     expect(getByText('12')).toBeTruthy();
     expect(getByText('3')).toBeTruthy();
     await waitFor(() => expect(getByText('Hello from the profile feed')).toBeTruthy());
+  });
+
+  it('liking a Posts-tab post calls posts.like and reconciles the count (no toast)', async () => {
+    const { getByLabelText, getByText } = await renderScreen();
+    await waitFor(() => expect(getByText('Hello from the profile feed')).toBeTruthy());
+
+    fireEvent.press(getByLabelText('Like'));
+
+    await waitFor(() => expect(like).toHaveBeenCalledWith(99));
+    await waitFor(() => expect(getByLabelText('Unlike')).toBeTruthy());
+    expect(getByText('1')).toBeTruthy();
   });
 
   it('pressing "Add friend" sends the request and flips to "Requested"', async () => {

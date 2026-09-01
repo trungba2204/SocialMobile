@@ -17,6 +17,12 @@ export type PostCardProps = {
   onToggleLike: (next: boolean) => void;
   onPressComments: () => void;
   onShare: () => void;
+  /**
+   * Controlled like state for non-list hosts (e.g. the detail hero). When
+   * provided, PostCard renders from it and `onToggleLike` does not self-flip —
+   * the host owns optimistic update, reconcile and rollback.
+   */
+  likeState?: { liked: boolean; count: number };
 };
 
 const HAIRLINE: Record<PostPrivacy, 'accent' | 'primary' | 'textSecondary'> = {
@@ -32,25 +38,37 @@ export function PostCard({
   onToggleLike,
   onPressComments,
   onShare,
+  likeState,
 }: PostCardProps) {
   const theme = useTheme();
+  const controlled = likeState !== undefined;
   const [liked, setLiked] = useState(post.likedByMe);
   const [likeCount, setLikeCount] = useState(post.likeCount);
 
   // Re-seed from props when the authoritative post changes (server sync / rollback).
   const prev = useRef({ liked: post.likedByMe, count: post.likeCount });
-  if (prev.current.liked !== post.likedByMe || prev.current.count !== post.likeCount) {
+  if (
+    !controlled &&
+    (prev.current.liked !== post.likedByMe || prev.current.count !== post.likeCount)
+  ) {
     prev.current = { liked: post.likedByMe, count: post.likeCount };
     setLiked(post.likedByMe);
     setLikeCount(post.likeCount);
   }
 
   const toggleLike = useCallback(() => {
+    if (controlled) {
+      onToggleLike(!likeState!.liked);
+      return;
+    }
     const next = !liked;
     setLiked(next);
     setLikeCount((c) => c + (next ? 1 : -1));
     onToggleLike(next);
-  }, [liked, onToggleLike]);
+  }, [controlled, likeState, liked, onToggleLike]);
+
+  const shownLiked = controlled ? likeState!.liked : liked;
+  const shownCount = controlled ? likeState!.count : likeCount;
 
   const meta = [post.feeling, post.location].filter(Boolean).join(' · ');
 
@@ -99,8 +117,8 @@ export function PostCard({
           style={{ paddingHorizontal: theme.space.lg, paddingTop: theme.space.md, paddingBottom: theme.space.sm }}
         >
           <PostActions
-            liked={liked}
-            likeCount={likeCount}
+            liked={shownLiked}
+            likeCount={shownCount}
             commentCount={post.commentCount}
             shareCount={post.shareCount}
             onToggleLike={toggleLike}

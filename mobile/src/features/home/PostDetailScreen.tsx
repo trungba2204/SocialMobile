@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
@@ -31,16 +31,32 @@ export function PostDetailScreen() {
 
   const { data: post, loading, error, reload } = useResource(() => posts.get(postId), [postId]);
 
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  useEffect(() => {
+    if (post) {
+      setLiked(post.likedByMe);
+      setLikeCount(post.likeCount);
+    }
+  }, [post]);
+
   const onToggleLike = useCallback(
     async (next: boolean) => {
+      const prevLiked = liked;
+      const prevCount = likeCount;
+      setLiked(next);
+      setLikeCount((c) => c + (next ? 1 : -1));
       try {
-        if (next) await posts.like(postId);
-        else await posts.unlike(postId);
+        const res = next ? await posts.like(postId) : await posts.unlike(postId);
+        setLiked(res.liked);
+        setLikeCount(res.likeCount);
       } catch {
+        setLiked(prevLiked);
+        setLikeCount(prevCount);
         showToast({ message: 'Could not update like', tone: 'error' });
       }
     },
-    [postId, showToast],
+    [postId, liked, likeCount, showToast],
   );
 
   const onShare = useCallback(async () => {
@@ -111,6 +127,7 @@ export function PostDetailScreen() {
           header={
             <PostCard
               post={post}
+              likeState={{ liked, count: likeCount }}
               onPressPost={() => undefined}
               onPressAuthor={() => navigation.navigate('UserProfile', { userId: post.author.id })}
               onToggleLike={(next) => {

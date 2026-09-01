@@ -58,7 +58,7 @@ export function FeedScreen() {
         refresh();
       }
       notifications
-        .list(0)
+        .list(0, 1)
         .then(({ unread }) => {
           if (active) useUiStore.getState().setUnreadNotifications(unread);
         })
