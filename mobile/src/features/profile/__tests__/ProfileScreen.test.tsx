@@ -20,6 +20,7 @@ jest.mock('@react-navigation/native', () => ({
 const getProfile = usersApi.getProfile as jest.MockedFunction<typeof usersApi.getProfile>;
 const posts = usersApi.posts as jest.MockedFunction<typeof usersApi.posts>;
 const sendRequest = friendsApi.sendRequest as jest.MockedFunction<typeof friendsApi.sendRequest>;
+const remove = friendsApi.remove as jest.MockedFunction<typeof friendsApi.remove>;
 
 const PROFILE: UserProfileDto = {
   id: 7,
@@ -75,6 +76,7 @@ describe('ProfileScreen (other user)', () => {
     });
     getProfile.mockResolvedValue(PROFILE);
     posts.mockResolvedValue(page([POST]));
+    remove.mockResolvedValue(undefined);
     sendRequest.mockResolvedValue({
       id: 5,
       requester: { id: 1, username: 'me', displayName: 'Me', avatarUrl: null, bio: null },
@@ -101,5 +103,20 @@ describe('ProfileScreen (other user)', () => {
 
     await waitFor(() => expect(sendRequest).toHaveBeenCalledWith(7));
     await waitFor(() => expect(getByText('Requested')).toBeTruthy());
+  });
+
+  it('unfriend requires confirming the modal before friends.remove is called', async () => {
+    getProfile.mockResolvedValue({ ...PROFILE, friendStatus: 'FRIENDS' });
+    const { getByText, findByLabelText, findByText } = await renderScreen();
+
+    fireEvent.press(await findByLabelText('Friends'));
+    fireEvent.press(await findByText('Unfriend'));
+
+    // Menu tap opens the confirm modal — no removal yet.
+    await findByText(/Unfriend Ben Carter/);
+    expect(remove).not.toHaveBeenCalled();
+
+    fireEvent.press(getByText('Unfriend'));
+    await waitFor(() => expect(remove).toHaveBeenCalledWith(7));
   });
 });

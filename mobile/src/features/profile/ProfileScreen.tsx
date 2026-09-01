@@ -11,6 +11,8 @@ import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
 import { ListFooter } from '@/components/ListFooter';
 import { Divider } from '@/components/Divider';
+import { AppModal } from '@/components/AppModal';
+import { Button } from '@/components/Button';
 import { useResource } from '@/hooks/useResource';
 import { usePagedQuery } from '@/hooks/usePagedQuery';
 import * as users from '@/api/users';
@@ -19,7 +21,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useUiStore } from '@/store/useUiStore';
 import type { FriendStatus, PostDto } from '@/api/types';
 import { PostCard } from '@/features/home/components/PostCard';
-import { ProfileHeader } from './components/ProfileHeader';
+import { ProfileHeader, COVER_HEIGHT } from './components/ProfileHeader';
 
 const TABS = [
   { key: 'posts', label: 'Posts' },
@@ -30,7 +32,7 @@ function HeroSkeleton() {
   const theme = useTheme();
   return (
     <View testID="profile-skeleton">
-      <Skeleton width="100%" height={150} radius={0} />
+      <Skeleton width="100%" height={COVER_HEIGHT} radius={0} />
       <View style={{ padding: theme.space.lg, gap: theme.space.md }}>
         <Skeleton width={88} height={88} radius={44} />
         <Skeleton width={180} height={16} />
@@ -46,6 +48,7 @@ export function ProfileScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const authUser = useAuthStore((s) => s.user);
+  const showToast = useUiStore((s) => s.showToast);
 
   const paramUserId: number | undefined = route.params?.userId;
   const isSelf = paramUserId === undefined || paramUserId === authUser?.id;
@@ -60,8 +63,10 @@ export function ProfileScreen() {
 
   const [tab, setTab] = useState('posts');
   const [statusOverride, setStatusOverride] = useState<FriendStatus | null>(null);
+  const [unfriendOpen, setUnfriendOpen] = useState(false);
   useEffect(() => {
     setStatusOverride(null);
+    setUnfriendOpen(false);
   }, [targetId]);
 
   const friendStatus: FriendStatus =
@@ -75,17 +80,22 @@ export function ProfileScreen() {
     setStatusOverride('PENDING_OUT');
     friends.sendRequest(targetId).catch(() => {
       setStatusOverride('NONE');
-      useUiStore.getState().showToast({ message: 'Could not send request', tone: 'error' });
+      showToast({ message: 'Could not send request', tone: 'error' });
     });
-  }, [targetId]);
+  }, [targetId, showToast]);
 
   const onUnfriend = useCallback(() => {
+    setUnfriendOpen(true);
+  }, []);
+
+  const confirmUnfriend = useCallback(() => {
+    setUnfriendOpen(false);
     setStatusOverride('NONE');
     friends.remove(targetId).catch(() => {
       setStatusOverride('FRIENDS');
-      useUiStore.getState().showToast({ message: 'Could not unfriend', tone: 'error' });
+      showToast({ message: 'Could not unfriend', tone: 'error' });
     });
-  }, [targetId]);
+  }, [targetId, showToast]);
 
   const onAcceptNavigate = useCallback(() => {
     navigation.navigate('FriendsTab');
@@ -119,12 +129,14 @@ export function ProfileScreen() {
         post={item}
         onPressPost={() => navigation.navigate('PostDetail', { postId: item.id })}
         onPressAuthor={() => navigation.navigate('UserProfile', { userId: item.author.id })}
-        onToggleLike={() => {}}
+        onToggleLike={() =>
+          showToast({ message: 'Open the post to react', tone: 'neutral' })
+        }
         onPressComments={() => navigation.navigate('PostDetail', { postId: item.id })}
         onShare={() => navigation.navigate('PostDetail', { postId: item.id })}
       />
     ),
-    [navigation],
+    [navigation, showToast],
   );
 
   const About = profile ? (
@@ -203,10 +215,26 @@ export function ProfileScreen() {
           showsVerticalScrollIndicator={false}
         />
       )}
+
+      <AppModal visible={unfriendOpen} onClose={() => setUnfriendOpen(false)}>
+        <View style={{ gap: theme.space.md }}>
+          <Text variant="title">
+            Unfriend {profile?.displayName ?? 'this person'}?
+          </Text>
+          <Text variant="body" color="textSecondary">
+            You will need to send a new friend request to reconnect.
+          </Text>
+          <View style={[styles.modalActions, { gap: theme.space.sm }]}>
+            <Button label="Cancel" variant="ghost" onPress={() => setUnfriendOpen(false)} />
+            <Button label="Unfriend" variant="danger" onPress={confirmUnfriend} />
+          </View>
+        </View>
+      </AppModal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
+  modalActions: { flexDirection: 'row', justifyContent: 'flex-end' },
 });

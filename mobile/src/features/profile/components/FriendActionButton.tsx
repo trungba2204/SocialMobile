@@ -7,6 +7,9 @@ import { Button } from '@/components/Button';
 import { PressableScale } from '@/components/PressableScale';
 import type { FriendStatus } from '@/api/types';
 
+// Token-less geometry for the inline "Friends" dropdown menu.
+const MENU_MIN_WIDTH = 160;
+
 export type FriendActionButtonProps = {
   status: FriendStatus;
   onAdd: () => void;
@@ -79,6 +82,6 @@ export function FriendActionButton({
 
 const styles = StyleSheet.create({
   friendsWrap: { alignSelf: 'flex-start' },
-  menu: { borderWidth: StyleSheet.hairlineWidth, minWidth: 160 },
+  menu: { borderWidth: StyleSheet.hairlineWidth, minWidth: MENU_MIN_WIDTH },
   menuItem: { alignItems: 'flex-start' },
 });

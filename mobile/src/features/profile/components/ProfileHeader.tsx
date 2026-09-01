@@ -24,8 +24,11 @@ export type ProfileHeaderProps = {
   onPressFriends: () => void;
 };
 
-const COVER_HEIGHT = 150;
+// Token-less geometry (shared with EditProfileScreen + HeroSkeleton).
+export const COVER_HEIGHT = 140;
 const AVATAR_SIZE = 88;
+// White ring drawn around the avatar where it overlaps the cover.
+const AVATAR_RING = 3;
 
 export function ProfileHeader({
   profile,
@@ -113,7 +116,7 @@ export function ProfileHeader({
 const styles = StyleSheet.create({
   cover: { width: '100%', overflow: 'hidden' },
   avatarRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
-  avatarWrap: { borderRadius: AVATAR_SIZE / 2 + 3, borderWidth: 3 },
+  avatarWrap: { borderRadius: AVATAR_SIZE / 2 + AVATAR_RING, borderWidth: AVATAR_RING },
   stats: { flexDirection: 'row', alignItems: 'center' },
   actions: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' },
 });

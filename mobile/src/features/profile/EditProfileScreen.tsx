@@ -17,6 +17,7 @@ import { validateBio, validateDisplayName } from '@/lib/validation';
 import { resolveMediaUrl } from '@/lib/resolveMediaUrl';
 import type { PickedAsset } from '@/api/media';
 import * as users from '@/api/users';
+import { COVER_HEIGHT } from './components/ProfileHeader';
 
 function toPickedAsset(asset: ImagePicker.ImagePickerAsset): PickedAsset {
   return {
@@ -26,8 +27,9 @@ function toPickedAsset(asset: ImagePicker.ImagePickerAsset): PickedAsset {
   };
 }
 
-const COVER_HEIGHT = 140;
 const AVATAR_SIZE = 88;
+// White ring around the avatar where it overlaps the cover.
+const AVATAR_RING = 3;
 
 export function EditProfileScreen() {
   const theme = useTheme();
@@ -115,7 +117,7 @@ export function EditProfileScreen() {
             contentFit="cover"
           />
         ) : null}
-        <View style={styles.coverBadge}>
+        <View style={[styles.coverBadge, { gap: theme.space.xs }]}>
           <Camera size={18} color={theme.colors.onPrimary} />
           <Text variant="metadata" color="onPrimary">
             {uploadingCover ? 'Uploading…' : 'Edit cover'}
@@ -170,7 +172,7 @@ export function EditProfileScreen() {
 
 const styles = StyleSheet.create({
   cover: { width: '100%', overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
-  coverBadge: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  coverBadge: { flexDirection: 'row', alignItems: 'center' },
   avatarRow: { flexDirection: 'row', alignItems: 'center' },
-  avatarWrap: { borderRadius: AVATAR_SIZE / 2 + 3, borderWidth: 3 },
+  avatarWrap: { borderRadius: AVATAR_SIZE / 2 + AVATAR_RING, borderWidth: AVATAR_RING },
 });
