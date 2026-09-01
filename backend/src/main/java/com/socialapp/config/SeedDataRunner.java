@@ -4,6 +4,12 @@ import com.socialapp.friend.Friendship;
 import com.socialapp.friend.FriendRequest;
 import com.socialapp.friend.FriendRequestRepository;
 import com.socialapp.friend.FriendshipRepository;
+import com.socialapp.conversation.Conversation;
+import com.socialapp.conversation.ConversationMember;
+import com.socialapp.conversation.ConversationMemberRepository;
+import com.socialapp.conversation.ConversationRepository;
+import com.socialapp.conversation.Message;
+import com.socialapp.conversation.MessageRepository;
 import com.socialapp.notification.Notification;
 import com.socialapp.notification.NotificationRepository;
 import com.socialapp.notification.NotificationType;
@@ -79,13 +85,18 @@ public class SeedDataRunner implements ApplicationRunner {
     private final FriendshipRepository friendships;
     private final FriendRequestRepository friendRequests;
     private final NotificationRepository notifications;
+    private final ConversationRepository conversations;
+    private final ConversationMemberRepository conversationMembers;
+    private final MessageRepository messages;
     private final PasswordEncoder passwordEncoder;
     private final SeedProperties properties;
 
     public SeedDataRunner(UserRepository users, RoleRepository roles, PostRepository posts,
                           PostLikeRepository likes, CommentRepository comments,
                           FriendshipRepository friendships, FriendRequestRepository friendRequests,
-                          NotificationRepository notifications, PasswordEncoder passwordEncoder,
+                          NotificationRepository notifications, ConversationRepository conversations,
+                          ConversationMemberRepository conversationMembers, MessageRepository messages,
+                          PasswordEncoder passwordEncoder,
                           SeedProperties properties) {
         this.users = users;
         this.roles = roles;
@@ -95,6 +106,9 @@ public class SeedDataRunner implements ApplicationRunner {
         this.friendships = friendships;
         this.friendRequests = friendRequests;
         this.notifications = notifications;
+        this.conversations = conversations;
+        this.conversationMembers = conversationMembers;
+        this.messages = messages;
         this.passwordEncoder = passwordEncoder;
         this.properties = properties;
     }
@@ -116,6 +130,7 @@ public class SeedDataRunner implements ApplicationRunner {
         seedEngagement(people, allPosts, rnd);
         seedGraph(people);
         seedNotifications(people, allPosts);
+        seedConversations(people);
 
         log.info("Seed complete: {} users, {} posts", people.size(), allPosts.size());
     }
@@ -188,6 +203,61 @@ public class SeedDataRunner implements ApplicationRunner {
         // Pending requests addressed to alice (index 0) from non-friends.
         friendRequests.save(new FriendRequest(people.get(6).getId(), people.get(0).getId()));
         friendRequests.save(new FriendRequest(people.get(9).getId(), people.get(0).getId()));
+    }
+
+    private void seedConversations(List<User> people) {
+        // alice (index 0) chats with a few of her friends.
+        int[] peers = {1, 4, 2}; // ben, elena, chloe
+        String[][] scripts = {
+                {"Hey, are we still on for coffee tomorrow?",
+                 "Yes! 9am at the usual place?",
+                 "Perfect. I'll bring the mockups.",
+                 "Great, I have some feedback on the onboarding flow.",
+                 "Can't wait to hear it.",
+                 "See you then!"},
+                {"Loved your latest illustration series.",
+                 "Thank you! Took forever to get the colors right.",
+                 "It shows. The palette is gorgeous.",
+                 "We should collaborate on something soon.",
+                 "I'm in. Let's sketch ideas this weekend.",
+                 "Sending you a moodboard tonight.",
+                 "Yes please!"},
+                {"Did you get the photos from the hike?",
+                 "Just downloaded them, they look amazing.",
+                 "That ridge shot is my favorite.",
+                 "Same. Printing that one for sure.",
+                 "Send me the full res when you can."}
+        };
+        for (int p = 0; p < peers.length; p++) {
+            User peer = people.get(peers[p]);
+            User alice = people.get(0);
+            Conversation conv = conversations.save(new Conversation(false, null));
+            ConversationMember aliceMember = conversationMembers.save(
+                    new ConversationMember(conv.getId(), alice.getId()));
+            ConversationMember peerMember = conversationMembers.save(
+                    new ConversationMember(conv.getId(), peer.getId()));
+
+            String[] lines = scripts[p];
+            Message last = null;
+            for (int i = 0; i < lines.length; i++) {
+                // even index = peer speaks, odd = alice
+                Long senderId = (i % 2 == 0) ? peer.getId() : alice.getId();
+                last = messages.save(new Message(conv.getId(), senderId, lines[i]));
+            }
+            conv.setLastMessageId(last.getId());
+            conversations.save(conv);
+
+            peerMember.setLastReadMessageId(last.getId());
+            // Leave a couple of conversations unread for alice.
+            if (p == 0) {
+                aliceMember.setLastReadMessageId(last.getId());
+                aliceMember.setUnreadCount(0);
+            } else {
+                aliceMember.setUnreadCount(2);
+            }
+            conversationMembers.save(aliceMember);
+            conversationMembers.save(peerMember);
+        }
     }
 
     private void seedNotifications(List<User> people, List<Post> allPosts) {

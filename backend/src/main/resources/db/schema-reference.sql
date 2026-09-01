@@ -162,3 +162,41 @@ CREATE TABLE notifications (
   PRIMARY KEY (id),
   KEY ix_notifications_recipient_created (recipient_id, created_at)
 ) ENGINE=InnoDB;
+
+CREATE TABLE conversations (
+  id              BIGINT       NOT NULL AUTO_INCREMENT,
+  is_group        BIT(1)       NOT NULL DEFAULT b'0',
+  title           VARCHAR(120) NULL,
+  last_message_id BIGINT       NULL,
+  created_at      DATETIME(6)  NOT NULL,
+  updated_at      DATETIME(6)  NOT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB;
+
+CREATE TABLE conversation_members (
+  id                   BIGINT      NOT NULL AUTO_INCREMENT,
+  conversation_id      BIGINT      NOT NULL,
+  user_id              BIGINT      NOT NULL,
+  last_read_message_id BIGINT      NULL,
+  unread_count         INT         NOT NULL DEFAULT 0,
+  created_at           DATETIME(6) NOT NULL,
+  updated_at           DATETIME(6) NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_conversation_member (conversation_id, user_id),
+  KEY ix_conversation_member_user (user_id),
+  CONSTRAINT fk_conversation_members_conversation FOREIGN KEY (conversation_id) REFERENCES conversations (id),
+  CONSTRAINT fk_conversation_members_user FOREIGN KEY (user_id) REFERENCES users (id)
+) ENGINE=InnoDB;
+
+CREATE TABLE messages (
+  id              BIGINT        NOT NULL AUTO_INCREMENT,
+  conversation_id BIGINT        NOT NULL,
+  sender_id       BIGINT        NOT NULL,
+  content         VARCHAR(4000) NOT NULL,
+  created_at      DATETIME(6)   NOT NULL,
+  updated_at      DATETIME(6)   NOT NULL,
+  PRIMARY KEY (id),
+  KEY ix_messages_conversation_created (conversation_id, created_at),
+  CONSTRAINT fk_messages_conversation FOREIGN KEY (conversation_id) REFERENCES conversations (id),
+  CONSTRAINT fk_messages_sender FOREIGN KEY (sender_id) REFERENCES users (id)
+) ENGINE=InnoDB;
