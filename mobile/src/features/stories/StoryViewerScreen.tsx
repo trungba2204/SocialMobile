@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSharedValue } from 'react-native-reanimated';
@@ -21,7 +22,7 @@ const TICK_MS = 50;
 export function StoryViewerScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'StoryViewer'>>();
 
   const userIndex = route.params?.userIndex ?? 0;
@@ -32,6 +33,8 @@ export function StoryViewerScreen() {
   const [paused, setPaused] = useState(false);
   const progress = useSharedValue(0);
   const elapsedRef = useRef(0);
+  const heldRef = useRef(false);
+  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const story = stories[storyIndex]!;
   const duration = story.durationMs;
@@ -41,18 +44,38 @@ export function StoryViewerScreen() {
   const next = useCallback(() => {
     elapsedRef.current = 0;
     progress.value = 0;
-    setStoryIndex((i) => {
-      if (i < stories.length - 1) return i + 1;
+    if (storyIndex >= stories.length - 1) {
       goBack();
-      return i;
-    });
-  }, [stories.length, goBack, progress]);
+      return;
+    }
+    setStoryIndex((i) => i + 1);
+  }, [storyIndex, stories.length, goBack, progress]);
 
   const prev = useCallback(() => {
     elapsedRef.current = 0;
     progress.value = 0;
     setStoryIndex((i) => (i > 0 ? i - 1 : i));
   }, [progress]);
+
+  // A press held longer than this is a hold-to-pause gesture, not a tap — it must not advance/rewind.
+  const HOLD_MS = 200;
+  const hold = () => {
+    heldRef.current = false;
+    if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
+    holdTimerRef.current = setTimeout(() => {
+      heldRef.current = true;
+    }, HOLD_MS);
+    haptics.selection();
+    setPaused(true);
+  };
+  const release = () => {
+    if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
+    holdTimerRef.current = null;
+    setPaused(false);
+  };
+  const tapThen = (action: () => void) => () => {
+    if (!heldRef.current) action();
+  };
 
   // Timer + progress fill. Recomputes remaining time on pause/resume and per story.
   useEffect(() => {
@@ -70,11 +93,9 @@ export function StoryViewerScreen() {
     return () => clearInterval(id);
   }, [paused, storyIndex, duration, next, progress]);
 
-  const hold = () => {
-    haptics.selection();
-    setPaused(true);
-  };
-  const release = () => setPaused(false);
+  useEffect(() => () => {
+    if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
+  }, []);
 
   return (
     <View style={[styles.root, { backgroundColor: '#000' }]} testID="story-viewer-screen">
@@ -90,14 +111,14 @@ export function StoryViewerScreen() {
       {/* Tap zones: left = previous, right = next; hold anywhere = pause. */}
       <Pressable
         style={[styles.zone, styles.zoneLeft]}
-        onPress={prev}
+        onPress={tapThen(prev)}
         onPressIn={hold}
         onPressOut={release}
         accessibilityLabel="Previous story"
       />
       <Pressable
         style={[styles.zone, styles.zoneRight]}
-        onPress={next}
+        onPress={tapThen(next)}
         onPressIn={hold}
         onPressOut={release}
         accessibilityLabel="Next story"

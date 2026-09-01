@@ -29,6 +29,7 @@ async function renderScreen() {
 
 const REEL = MOCK_STORIES[0]!;
 const COUNT = REEL.stories.length;
+const DURATION = REEL.stories[0]!.durationMs;
 
 describe('StoryViewerScreen', () => {
   beforeEach(() => {
@@ -52,7 +53,7 @@ describe('StoryViewerScreen', () => {
   it('advances to the second story once the duration elapses', async () => {
     const view = await renderScreen();
     await act(async () => {
-      jest.advanceTimersByTime(REEL.stories[0]!.durationMs + 100);
+      jest.advanceTimersByTime(DURATION + 100);
     });
     expect(view.getByText(`2/${COUNT}`)).toBeTruthy();
     expect(view.getByTestId('story-image').props.source).toEqual({
@@ -77,6 +78,40 @@ describe('StoryViewerScreen', () => {
       fireEvent.press(view.getByLabelText('Previous story'));
     });
     expect(view.getByText(`1/${COUNT}`)).toBeTruthy();
+  });
+
+  it('holding a tap zone pauses the timer, and a quick tap still advances', async () => {
+    const view = await renderScreen();
+    const zone = view.getByLabelText('Next story');
+
+    // Press and hold well past the story duration.
+    await act(async () => {
+      fireEvent(zone, 'pressIn');
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(DURATION + 500);
+    });
+    // Release after the long hold — must NOT advance, and the timer was paused.
+    await act(async () => {
+      fireEvent(zone, 'pressOut');
+    });
+    await act(async () => {
+      fireEvent.press(zone);
+    });
+    expect(view.getByText(`1/${COUNT}`)).toBeTruthy();
+    expect(mockGoBack).not.toHaveBeenCalled();
+
+    // A quick tap (press + immediate release, under the hold threshold) advances normally.
+    await act(async () => {
+      fireEvent(zone, 'pressIn');
+    });
+    await act(async () => {
+      fireEvent(zone, 'pressOut');
+    });
+    await act(async () => {
+      fireEvent.press(zone);
+    });
+    expect(view.getByText(`2/${COUNT}`)).toBeTruthy();
   });
 
   it('calls navigation.goBack after the last story finishes', async () => {
