@@ -68,10 +68,14 @@ against the seeded backend. There is no automated on-device / simulator E2E in M
 
 ## Screens backed by mock data
 
-**Stories** and **Messages** are complete, interactive UI wired to fixtures in
-`src/mock/` — there is no M1 backend for them. Real APIs land in **M2 (Stories)**
-and **M3 (Messaging)**; realtime (typing, delivery) is **M4**. The code is marked
-with `// M2` / `// M3` comments.
+**Stories** is the **only** feature still on mock data (`src/mock/stories.ts`,
+imported solely by `StoriesRail` and `StoryViewerScreen`) — there is no backend
+Story endpoint yet; the real API lands in a later milestone.
+
+**Messages is real as of M3** — `ConversationListScreen` / `ChatScreen` call the
+live REST API via `@/api/conversations` (`GET/POST /api/conversations`,
+`.../messages`, `.../read`). Delivery is pull-to-refresh + poll-on-focus;
+realtime transport (STOMP/WebSocket, typing, receipts) is **M4**.
 
 Several **Settings** sub-screens (Account, Privacy, Security, Notifications,
 Blocked users, Help) are intentional "coming soon" stubs per the spec — Appearance
@@ -102,7 +106,7 @@ Non-blocking nits deferred from task reviews:
 - `useNavigation<any>()` is used in several screens — replace with typed
   navigator params.
 - Magic spacing / `Array<T>` vs `T[]` nits in `MessageBubble`, `ConversationRow`,
-  composer components and `src/mock/conversations.ts`.
+  composer components.
 - `await fireEvent(...)` / `await render(...)` harmless-noise in a few test files.
 - `PostDetail` / `CommentsThread` `KeyboardAvoidingView` has no
   `keyboardVerticalOffset`; re-check on a physical iOS device and add a
