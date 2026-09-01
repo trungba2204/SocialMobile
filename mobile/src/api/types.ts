@@ -82,6 +82,29 @@ export interface NotificationDto {
   createdAt: string;
 }
 
+export interface LastMessageDto {
+  id: number;
+  content: string;
+  senderId: number;
+  createdAt: string;
+}
+
+export interface ConversationDto {
+  id: number;
+  peer: UserDto;
+  lastMessage: LastMessageDto | null;
+  unreadCount: number;
+  updatedAt: string;
+}
+
+export interface MessageDto {
+  id: number;
+  conversationId: number;
+  sender: UserDto;
+  content: string;
+  createdAt: string;
+}
+
 export interface AuthResponse {
   accessToken: string;
   refreshToken: string;

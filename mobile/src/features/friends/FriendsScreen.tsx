@@ -17,12 +17,26 @@ import { useResource } from '@/hooks/useResource';
 import { useUiStore } from '@/store/useUiStore';
 import { ApiError } from '@/api/errors';
 import * as friends from '@/api/friends';
+import * as conversations from '@/api/conversations';
 import type { FriendRequestDto, UserDto } from '@/api/types';
 import { UserRow } from './components/UserRow';
 import { RequestRow } from './components/RequestRow';
 import { SuggestionCard } from './components/SuggestionCard';
 
 type TabKey = 'all' | 'requests' | 'suggestions';
+
+async function openChat(
+  navigation: { navigate: (...args: any[]) => void },
+  showToast: (t: { message: string; tone: 'neutral' | 'success' | 'error' }) => void,
+  peerUserId: number,
+) {
+  try {
+    const c = await conversations.getOrCreate(peerUserId);
+    navigation.navigate('Messages', { screen: 'Chat', params: { conversationId: c.id } });
+  } catch {
+    showToast({ message: 'Could not open conversation', tone: 'error' });
+  }
+}
 
 const TABS = [
   { key: 'all', label: 'All' },
@@ -122,7 +136,7 @@ function AllTab({ navigation, showToast, onFindPeople }: TabProps & { onFindPeop
           <UserRow
             user={item}
             onPress={() => navigation.navigate('UserProfile', { userId: item.id })}
-            onMessage={() => navigation.navigate('Messages')}
+            onMessage={() => void openChat(navigation, showToast, item.id)}
             onMore={() => setConfirm(item)}
           />
         )}

@@ -47,7 +47,7 @@ export type SearchStackParamList = {
 
 export type MessagesStackParamList = {
   ConversationList: undefined;
-  Chat: { conversationId: string };
+  Chat: { conversationId: number };
 };
 
 export type MainTabParamList = {

@@ -35,10 +35,13 @@ describe('resolveNotification', () => {
     expect(nav.navigate).toHaveBeenCalledWith('UserProfile', { userId: 4 });
   });
 
-  it('routes MESSAGE to Messages', () => {
+  it('routes MESSAGE to the Chat screen with the conversation id', () => {
     const nav = { navigate: jest.fn() };
-    resolveNotification(makeNotification({ type: 'MESSAGE' }), nav);
-    expect(nav.navigate).toHaveBeenCalledWith('Messages', { screen: 'ConversationList' });
+    resolveNotification(makeNotification({ type: 'MESSAGE', entityId: 12 }), nav);
+    expect(nav.navigate).toHaveBeenCalledWith('Messages', {
+      screen: 'Chat',
+      params: { conversationId: 12 },
+    });
   });
 
   it('no-ops on unknown / STORY_REACTION', () => {

@@ -23,7 +23,14 @@ export function resolveNotification(n: NotificationDto, nav: Navigator): void {
       return;
     }
     case 'MESSAGE': {
-      nav.navigate('Messages', { screen: 'ConversationList' });
+      if (n.entityId != null) {
+        nav.navigate('Messages', {
+          screen: 'Chat',
+          params: { conversationId: n.entityId },
+        });
+      } else {
+        nav.navigate('Messages', { screen: 'ConversationList' });
+      }
       return;
     }
     default:

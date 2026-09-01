@@ -18,6 +18,7 @@ import { usePagedQuery } from '@/hooks/usePagedQuery';
 import * as users from '@/api/users';
 import * as friends from '@/api/friends';
 import * as posts from '@/api/posts';
+import * as conversations from '@/api/conversations';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useUiStore } from '@/store/useUiStore';
 import type { FriendStatus, PostDto } from '@/api/types';
@@ -127,6 +128,18 @@ export function ProfileScreen() {
     });
   }, [targetId, showToast]);
 
+  const onMessage = useCallback(async () => {
+    try {
+      const c = await conversations.getOrCreate(targetId);
+      navigation.navigate('Messages', {
+        screen: 'Chat',
+        params: { conversationId: c.id },
+      });
+    } catch {
+      showToast({ message: 'Could not open conversation', tone: 'error' });
+    }
+  }, [targetId, navigation, showToast]);
+
   const onAcceptNavigate = useCallback(() => {
     navigation.navigate('FriendsTab');
   }, [navigation]);
@@ -144,13 +157,13 @@ export function ProfileScreen() {
             onAddFriend={onAddFriend}
             onAcceptNavigate={onAcceptNavigate}
             onUnfriend={onUnfriend}
-            onMessage={() => navigation.navigate('Messages')}
+            onMessage={() => void onMessage()}
             onPressFriends={() => navigation.navigate('FriendsTab')}
           />
           <Tabs tabs={TABS} active={tab} onChange={setTab} />
         </>
       ) : null,
-    [profile, friendStatus, isSelf, tab, navigation, onAddFriend, onAcceptNavigate, onUnfriend],
+    [profile, friendStatus, isSelf, tab, navigation, onAddFriend, onAcceptNavigate, onUnfriend, onMessage],
   );
 
   const renderPost = useCallback(

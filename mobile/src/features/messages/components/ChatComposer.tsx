@@ -1,4 +1,3 @@
-// M3: messaging is mock data until the Conversation/Message API + STOMP ship.
 import { useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 import { Paperclip, Send } from 'lucide-react-native';
@@ -36,7 +35,7 @@ export function ChatComposer({ onSend }: ChatComposerProps) {
         },
       ]}
     >
-      {/* M3: attachments arrive with the real Message API — disabled placeholder for now. */}
+      {/* M4: attachments arrive with media messages — disabled placeholder for now. */}
       <IconButton
         icon={Paperclip}
         accessibilityLabel="Attach (coming soon)"

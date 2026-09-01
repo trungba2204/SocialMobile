@@ -1,11 +1,11 @@
-// M3: messaging is mock data until the Conversation/Message API + STOMP ship.
 import { StyleSheet, View } from 'react-native';
 import { useTheme } from '@/theme/useTheme';
 import { Text } from '@/components/Text';
-import type { MockMessage } from '@/mock/conversations';
+import { useAuthStore } from '@/store/useAuthStore';
+import type { MessageDto } from '@/api/types';
 
 export type MessageBubbleProps = {
-  message: MockMessage;
+  message: MessageDto;
 };
 
 function clockTime(iso: string): string {
@@ -14,7 +14,8 @@ function clockTime(iso: string): string {
 
 export function MessageBubble({ message }: MessageBubbleProps) {
   const theme = useTheme();
-  const mine = message.fromMe;
+  const meId = useAuthStore((s) => s.user?.id);
+  const mine = message.sender.id === meId;
 
   return (
     <View
@@ -36,11 +37,11 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         ]}
       >
         <Text variant="body" color={mine ? 'onPrimary' : 'textPrimary'}>
-          {message.text}
+          {message.content}
         </Text>
       </View>
       <Text variant="metadata" color="textDim" style={styles.time}>
-        {clockTime(message.at)}
+        {clockTime(message.createdAt)}
       </Text>
     </View>
   );
