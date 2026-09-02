@@ -17,8 +17,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("""
             select p from Post p
             where p.author.id = :viewerId
-               or p.author.id in :friendIds
-               or p.privacy = com.socialapp.post.Privacy.PUBLIC
+               or (p.author.id in :friendIds and p.privacy <> com.socialapp.post.Privacy.PRIVATE)
             order by p.createdAt desc
             """)
     Page<Post> findFeed(@Param("viewerId") Long viewerId,

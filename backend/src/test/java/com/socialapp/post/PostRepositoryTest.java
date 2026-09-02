@@ -41,12 +41,18 @@ class PostRepositoryTest {
     }
 
     @Test
-    void feedIncludesOwnFriendsAndPublicOnly() {
-        Page<Post> feed = posts.findFeed(me.getId(), Set.of(friend.getId(), -1L), PageRequest.of(0, 20));
+    void feedIsOwnPlusFriendsRespectingPrivacy() {
+        posts.save(new Post(me, "mine public", Privacy.PUBLIC));
+        posts.save(new Post(me, "mine friends-only", Privacy.FRIENDS));
+        posts.save(new Post(friend, "friend private", Privacy.PRIVATE));
+
+        Page<Post> feed = posts.findFeed(me.getId(), Set.of(friend.getId(), -1L), PageRequest.of(0, 50));
 
         List<String> contents = feed.getContent().stream().map(Post::getContent).toList();
-        assertThat(contents).contains("mine private", "friend friends-only", "friend public", "stranger public");
-        assertThat(contents).doesNotContain("stranger friends-only", "stranger private");
+        assertThat(contents).contains("mine private", "mine public", "mine friends-only",
+                "friend friends-only", "friend public");
+        assertThat(contents).doesNotContain("friend private",
+                "stranger friends-only", "stranger public", "stranger private");
     }
 
     @Test
