@@ -63,7 +63,8 @@ export type RootStackParamList = {
   CreatePost: undefined;
   SearchModal: NavigatorScreenParams<SearchStackParamList>;
   Messages: NavigatorScreenParams<MessagesStackParamList>;
-  StoryViewer: { userIndex: number };
+  StoryViewer: { authorId: number };
+  AddStory: undefined;
   ImageViewer: { images: string[]; index?: number };
 };
 

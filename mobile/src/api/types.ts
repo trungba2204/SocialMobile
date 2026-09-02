@@ -105,6 +105,23 @@ export interface MessageDto {
   createdAt: string;
 }
 
+export interface StoryDto {
+  id: number;
+  author: UserDto;
+  mediaUrl: string;
+  caption: string | null;
+  createdAt: string;
+  expiresAt: string;
+  viewedByMe: boolean;
+  viewerCount: number;
+}
+
+export interface StoryReelDto {
+  author: UserDto;
+  stories: StoryDto[];
+  hasUnseen: boolean;
+}
+
 export interface AuthResponse {
   accessToken: string;
   refreshToken: string;

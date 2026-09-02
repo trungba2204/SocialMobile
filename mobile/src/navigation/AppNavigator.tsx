@@ -12,6 +12,7 @@ import { PostDetailScreen } from '@/features/home/PostDetailScreen';
 import { ConversationListScreen } from '@/features/messages/ConversationListScreen';
 import { ChatScreen } from '@/features/messages/ChatScreen';
 import { StoryViewerScreen } from '@/features/stories/StoryViewerScreen';
+import { AddStoryScreen } from '@/features/stories/AddStoryScreen';
 import { ImageViewerScreen } from '@/features/media/ImageViewerScreen';
 
 const SearchStack = createNativeStackNavigator<SearchStackParamList>();
@@ -52,6 +53,11 @@ export function AppNavigator() {
         name="StoryViewer"
         component={StoryViewerScreen}
         options={{ presentation: 'transparentModal', animation: 'fade' }}
+      />
+      <Stack.Screen
+        name="AddStory"
+        component={AddStoryScreen}
+        options={{ presentation: 'modal' }}
       />
       <Stack.Screen
         name="ImageViewer"
