@@ -11,7 +11,6 @@ import { Button } from '@/components/Button';
 import { IconButton } from '@/components/IconButton';
 import { X } from 'lucide-react-native';
 import { useUiStore } from '@/store/useUiStore';
-import { resolveMediaUrl } from '@/lib/resolveMediaUrl';
 import type { PickedAsset } from '@/api/media';
 import * as stories from '@/api/stories';
 
@@ -73,7 +72,7 @@ export function AddStoryScreen() {
     >
       {asset ? (
         <Image
-          source={{ uri: resolveMediaUrl(asset.uri) }}
+          source={{ uri: asset.uri }}
           contentFit="cover"
           style={StyleSheet.absoluteFill}
           testID="add-story-preview"
