@@ -1,4 +1,4 @@
-// M2: stories are mock data until the Story API ships.
+// Segmented progress bar for the story viewer; driven by a reanimated SharedValue.
 import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import { useTheme } from '@/theme/useTheme';
