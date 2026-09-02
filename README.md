@@ -43,9 +43,22 @@ verified against MySQL (register → post → like → comment → share → fri
 conversation → message → avatar/cover upload → notifications → search).
 99 backend tests green; 124 Jest suites/tests green; `tsc` clean; `expo export` bundles.
 
-**Stories** remains the only mock-data feature (no backend Story endpoint yet).
+**Milestone 4 (Stories + feed scope): complete** — Stories is now a real REST
+feature end-to-end: `POST/GET/DELETE /api/stories`, `POST /api/stories/{id}/view`
+(self-view is a no-op), 24h expiry, friend-visibility (you see your own reel plus
+active reels of friends only), multipart upload with local media storage and
+file-delete on story delete. Backend: entity/repo/service/controller/mapper/dto +
+seed + tests. Mobile: rail, viewer (view-tracking + delete), AddStory upload —
+all via `@/api/stories`. The feed (`GET /api/posts`) is now own + friends'
+non-private posts only, never global public. **There is no mock/fake/hardcoded
+runtime data anywhere in the mobile app** — the `src/mock/` directory is gone and
+every `catch` sets an error state / toast / rethrows (never returns canned data).
+Brand-new friendless user verified against MySQL: posts / stories / conversations
+/ notifications / friends all empty; own post/story/message/avatar/cover persist
+(survive re-login); friending alice makes her story + non-private posts appear.
+119 backend tests green; 138 Jest tests green; `tsc` clean; `expo export` bundles.
 
-Remaining milestones: Stories API, M4 real-time (STOMP), M5 polish. See `docs/superpowers/`.
+Remaining milestones: M4 real-time (STOMP) deferred, M5 polish. See `docs/superpowers/`.
 
 ## Quick start (backend)
 

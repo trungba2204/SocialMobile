@@ -66,16 +66,29 @@ against the seeded backend. There is no automated on-device / simulator E2E in M
 - `src/theme/` — design tokens + `ThemeProvider` / `useTheme` (light + dark).
 - `src/navigation/` — bottom tabs + native stacks + modals.
 
-## Screens backed by mock data
+## No mock data
 
-**Stories** is the **only** feature still on mock data (`src/mock/stories.ts`,
-imported solely by `StoriesRail` and `StoryViewerScreen`) — there is no backend
-Story endpoint yet; the real API lands in a later milestone.
+**There is no mock / fake / hardcoded runtime data anywhere in the app.** The
+`src/mock/` directory has been deleted. Every feature — including **Stories** —
+talks to the live backend.
+
+**Stories is real as of M4** — `StoriesRail` / `StoryViewerScreen` /
+`AddStoryScreen` call the REST API via `@/api/stories` (`GET/POST/DELETE
+/api/stories`, `POST /api/stories/{id}/view`). Stories expire after 24h, are
+visible to the author plus their friends only, upload media as multipart, and the
+stored file is removed when the story is deleted; a self-view is a no-op.
+
+**The feed shows own + friends' non-private posts only** — `GET /api/posts` is no
+longer global public, so a brand-new friendless user's feed is empty until they
+post or add friends.
+
+Every `catch` block in `src/features` / `src/api` sets an error state, shows a
+toast, or rethrows — none returns canned data on failure.
 
 **Messages is real as of M3** — `ConversationListScreen` / `ChatScreen` call the
 live REST API via `@/api/conversations` (`GET/POST /api/conversations`,
 `.../messages`, `.../read`). Delivery is pull-to-refresh + poll-on-focus;
-realtime transport (STOMP/WebSocket, typing, receipts) is **M4**.
+realtime transport (STOMP/WebSocket, typing, receipts) is deferred.
 
 Several **Settings** sub-screens (Account, Privacy, Security, Notifications,
 Blocked users, Help) are intentional "coming soon" stubs per the spec — Appearance
