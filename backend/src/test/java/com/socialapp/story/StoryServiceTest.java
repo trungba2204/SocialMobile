@@ -178,12 +178,51 @@ class StoryServiceTest {
     void recordViewByViewerSavesOnceThenNoOp() {
         Story s = story(5L, 1L, Instant.now());
         when(stories.findById(5L)).thenReturn(Optional.of(s));
+        when(friendGraph.friendIds(2L)).thenReturn(Set.of(1L));
         when(storyViews.existsByStoryIdAndViewerId(5L, 2L)).thenReturn(false, true);
 
         service.recordView(5L, 2L);
         service.recordView(5L, 2L);
 
         verify(storyViews, org.mockito.Mockito.times(1)).save(any(StoryView.class));
+    }
+
+    @Test
+    void recordViewByNonFriendNonOwnerDoesNotSave() {
+        Story s = story(5L, 9L, Instant.now());
+        when(stories.findById(5L)).thenReturn(Optional.of(s));
+        when(friendGraph.friendIds(2L)).thenReturn(Set.of(3L));
+
+        service.recordView(5L, 2L);
+
+        verify(storyViews, never()).save(any());
+    }
+
+    @Test
+    void recordViewOnExpiredStoryIsNoOp() {
+        Story s = story(5L, 9L, Instant.now().minus(Duration.ofHours(48)));
+        when(stories.findById(5L)).thenReturn(Optional.of(s));
+        when(friendGraph.friendIds(2L)).thenReturn(Set.of(9L));
+
+        service.recordView(5L, 2L);
+
+        verify(storyViews, never()).save(any());
+    }
+
+    @Test
+    void createRejectsNonImageContentType() {
+        MultipartFile file = new MockMultipartFile("file", "v.mp4", "video/mp4", new byte[]{1, 2, 3});
+        assertThatThrownBy(() -> service.create(1L, file, null))
+                .isInstanceOf(com.socialapp.common.exception.ValidationException.class);
+    }
+
+    @Test
+    void getExpiredStoryThrowsNotFound() {
+        Story s = story(5L, 9L, Instant.now().minus(Duration.ofHours(48)));
+        when(stories.findById(5L)).thenReturn(Optional.of(s));
+        when(friendGraph.friendIds(1L)).thenReturn(Set.of(9L));
+        assertThatThrownBy(() -> service.get(5L, 1L))
+                .isInstanceOf(com.socialapp.common.exception.ResourceNotFoundException.class);
     }
 
     @Test

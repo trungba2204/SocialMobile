@@ -38,7 +38,7 @@ design system (light + dark), typed navigation. See [`mobile/README.md`](mobile/
 (`/api/conversations`, `.../messages`, `.../read`) on both backend (entities,
 service, controller, notification wiring, seed) and mobile (`ConversationListScreen`
 / `ChatScreen` via `@/api/conversations`). Delivery is poll-on-focus +
-pull-to-refresh; realtime transport (STOMP) is deferred to M4. Full end-to-end
+pull-to-refresh; real-time transport (STOMP) is a future enhancement, not in M1–M4. Full end-to-end
 verified against MySQL (register → post → like → comment → share → friend →
 conversation → message → avatar/cover upload → notifications → search).
 99 backend tests green; 124 Jest suites/tests green; `tsc` clean; `expo export` bundles.
@@ -56,9 +56,10 @@ every `catch` sets an error state / toast / rethrows (never returns canned data)
 Brand-new friendless user verified against MySQL: posts / stories / conversations
 / notifications / friends all empty; own post/story/message/avatar/cover persist
 (survive re-login); friending alice makes her story + non-private posts appear.
-119 backend tests green; 138 Jest tests green; `tsc` clean; `expo export` bundles.
+123 backend tests green; 139 Jest tests green; `tsc` clean; `expo export` bundles.
 
-Remaining milestones: M4 real-time (STOMP) deferred, M5 polish. See `docs/superpowers/`.
+Remaining milestones: M5 polish. Real-time (STOMP / WebSocket) is a future
+enhancement and is not part of M1–M4. See `docs/superpowers/`.
 
 ## Quick start (backend)
 

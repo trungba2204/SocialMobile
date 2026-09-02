@@ -145,6 +145,19 @@ describe('StoryViewerScreen', () => {
     expect(mockGoBack).toHaveBeenCalled();
   });
 
+  it('retry on a fetch error refetches the reels instead of closing', async () => {
+    reels.mockRejectedValueOnce(new Error('network'));
+    const view = await renderScreen();
+    await waitFor(() => expect(view.getByText('Try again')).toBeTruthy());
+    expect(mockGoBack).not.toHaveBeenCalled();
+    reels.mockResolvedValue([REEL]);
+    await act(async () => {
+      fireEvent.press(view.getByText('Try again'));
+    });
+    await waitFor(() => expect(view.getByTestId('story-image')).toBeTruthy());
+    expect(reels).toHaveBeenCalledTimes(2);
+  });
+
   it('goes back when no reel matches the author', async () => {
     reels.mockResolvedValue([]);
     await renderScreen();

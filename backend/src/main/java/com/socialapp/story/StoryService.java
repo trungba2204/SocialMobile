@@ -57,6 +57,10 @@ public class StoryService {
         if (file == null || file.isEmpty()) {
             throw new ValidationException("A story requires an image file");
         }
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new ValidationException("Story media must be an image");
+        }
         String trimmed = StringUtils.hasText(caption) ? caption.trim() : null;
         if (trimmed != null && trimmed.length() > MAX_CAPTION) {
             throw new ValidationException("Caption must be at most " + MAX_CAPTION + " characters");
@@ -125,6 +129,9 @@ public class StoryService {
         if (!visible(story, viewerId)) {
             throw new ForbiddenException("You cannot view this story");
         }
+        if (story.getExpiresAt().isBefore(Instant.now())) {
+            throw new ResourceNotFoundException("Story not found");
+        }
         boolean viewed = story.getAuthorId() == viewerId
                 || storyViews.existsByStoryIdAndViewerId(storyId, viewerId);
         return mapper.toDto(story, viewed, storyViews.countByStoryId(storyId));
@@ -145,6 +152,12 @@ public class StoryService {
     public void recordView(long storyId, long viewerId) {
         Story story = requireStory(storyId);
         if (story.getAuthorId() == viewerId) {
+            return;
+        }
+        if (!visible(story, viewerId)) {
+            return;
+        }
+        if (story.getExpiresAt().isBefore(Instant.now())) {
             return;
         }
         if (storyViews.existsByStoryIdAndViewerId(storyId, viewerId)) {

@@ -52,13 +52,21 @@ export function StoryViewerScreen() {
   const viewedRef = useRef<Set<number>>(new Set());
 
   const goBack = useCallback(() => navigation.goBack(), [navigation]);
+  const reloadToken = useRef(0);
+  const [reloadNonce, setReloadNonce] = useState(0);
+
+  const loadReels = useCallback(() => {
+    setError(null);
+    setLoading(true);
+    setReloadNonce((n) => n + 1);
+  }, []);
 
   useEffect(() => {
-    let cancelled = false;
+    const token = ++reloadToken.current;
     (async () => {
       try {
         const reels = await stories.reels();
-        if (cancelled) return;
+        if (token !== reloadToken.current) return;
         const reel = reels.find((r) => r.author.id === authorId);
         if (!reel || reel.stories.length === 0) {
           goBack();
@@ -67,15 +75,16 @@ export function StoryViewerScreen() {
         setAuthor(reel.author);
         setReelStories(reel.stories);
       } catch (e) {
-        if (!cancelled) setError(toApiError(e));
+        if (token === reloadToken.current) setError(toApiError(e));
       } finally {
-        if (!cancelled) setLoading(false);
+        if (token === reloadToken.current) setLoading(false);
       }
     })();
     return () => {
-      cancelled = true;
+      reloadToken.current++;
     };
-  }, [authorId, goBack]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authorId, reloadNonce]);
 
   const story = reelStories?.[storyIndex] ?? null;
   const count = reelStories?.length ?? 0;
@@ -183,7 +192,7 @@ export function StoryViewerScreen() {
   if (error) {
     return (
       <View style={[styles.root, styles.center, { backgroundColor: theme.colors.background }]} testID="story-viewer-screen">
-        <ErrorState message={error.message} onRetry={goBack} />
+        <ErrorState message={error.message} onRetry={loadReels} />
         <IconButton icon={X} onPress={goBack} accessibilityLabel="Close story" />
       </View>
     );

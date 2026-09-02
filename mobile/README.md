@@ -44,14 +44,17 @@ The value is read in `app.config.ts` and exposed via `expo-constants` as
 | Command | Purpose |
 |---|---|
 | `npx expo start` | Run the dev server |
-| `npm test` | Jest suite (36 suites / 107 tests) |
+| `npm test` | Jest suite (42 suites / 139 tests) |
 | `npx tsc --noEmit` | Type-check (zero errors) |
 | `npx expo lint` | Lint (scaffolds `eslint-config-expo` on first run) |
 | `npx expo export --platform ios` | Verify the whole app bundles |
 
-M1 verification: Jest + `tsc --noEmit` + `expo export`, plus a curl round-trip of
+Verification (M1–M4): Jest + `tsc --noEmit` + `expo export`, plus a curl round-trip of
 the key API contracts (login, feed, notifications, friends, search, profile)
-against the seeded backend. There is no automated on-device / simulator E2E in M1.
+against the seeded backend. M3 messaging + M4 stories + the brand-new-user flow
+(register a fresh account, no friends) were also verified against MySQL via curl,
+including the stories view-visibility guard. There is no automated on-device /
+simulator E2E.
 
 ## Architecture
 
